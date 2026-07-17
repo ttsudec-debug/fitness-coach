@@ -67,6 +67,13 @@ export const IconInfo = () => (
   </Icon>
 );
 
+export const IconMeal = () => (
+  <Icon>
+    <path d="M6 3v7a2 2 0 0 0 4 0V3M8 10v11" />
+    <path d="M16 3c-1.5 0-2.5 1.5-2.5 4s1 4 2.5 4 2.5-1.5 2.5-4-1-4-2.5-4ZM16 11v10" />
+  </Icon>
+);
+
 export const IconMusic = () => (
   <Icon>
     <path d="M9 18V5l11-2v13" />

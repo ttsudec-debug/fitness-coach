@@ -214,8 +214,9 @@ export default function Plan() {
         <h3>Consejo de hoy</h3>
         <p>{todaysFoodTip()}</p>
         <p className="muted small-text">
-          Guía diaria: {t.proteinG} g proteína · ~{t.kcal.toLocaleString('es')} kcal ·{' '}
-          {(t.waterMl / 1000).toFixed(1)} L agua. Preguntale al Coach por ideas de comidas concretas.
+          Guía diaria: ~{t.kcal.toLocaleString('es')} kcal · {t.proteinG} g proteína ·{' '}
+          {t.carbG} g carbos · {t.fatG} g grasa · {(t.waterMl / 1000).toFixed(1)} L agua. Registrá
+          tus comidas y seguí los macros en la pestaña <strong>Comida</strong>.
         </p>
       </section>
     </div>

@@ -4,6 +4,7 @@ import Today from './views/Today';
 import Plan from './views/Plan';
 import History from './views/History';
 import Routines from './views/Routines';
+import Nutrition from './views/Nutrition';
 import Coach from './views/Coach';
 import Settings from './views/Settings';
 import {
@@ -11,6 +12,7 @@ import {
   IconTarget,
   IconTrend,
   IconList,
+  IconMeal,
   IconChat,
   IconGear,
 } from './components/icons';
@@ -18,6 +20,7 @@ import {
 const TABS = [
   { id: 'hoy', label: 'Hoy', icon: IconDumbbell },
   { id: 'plan', label: 'Plan', icon: IconTarget },
+  { id: 'comida', label: 'Comida', icon: IconMeal },
   { id: 'historial', label: 'Progreso', icon: IconTrend },
   { id: 'rutinas', label: 'Rutinas', icon: IconList },
   { id: 'coach', label: 'Coach', icon: IconChat },
@@ -64,6 +67,7 @@ export default function App() {
         <div key={tab} className="tab-pane">
           {tab === 'hoy' && <Today />}
           {tab === 'plan' && <Plan />}
+          {tab === 'comida' && <Nutrition />}
           {tab === 'historial' && <History />}
           {tab === 'rutinas' && <Routines />}
           {tab === 'coach' && <Coach />}

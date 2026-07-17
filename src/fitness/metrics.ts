@@ -20,8 +20,17 @@ export interface Targets {
   tdee: number;
   kcal: number;
   proteinG: number;
+  carbG: number;
+  fatG: number;
   waterMl: number;
   setsPerMuscleWeek: string;
+}
+
+export interface MacroTargets {
+  kcal: number;
+  proteinG: number;
+  carbG: number;
+  fatG: number;
 }
 
 /** Métricas modernas: Mifflin-St Jeor para BMR, proteína 1.6–2.2 g/kg,
@@ -35,6 +44,11 @@ export function computeTargets(p: Profile): Targets {
   const tdee = bmr * activity;
   const kcal = p.goal === 'grasa' ? tdee * 0.85 : p.goal === 'musculo' ? tdee * 1.1 : tdee;
   const proteinPerKg = p.goal === 'grasa' ? 2.2 : p.goal === 'musculo' ? 2.0 : 1.6;
+  const kcalRounded = Math.round(kcal / 10) * 10;
+  const proteinG = Math.round(p.weightKg * proteinPerKg);
+  // Grasa ~25 % de las kcal; el resto de kcal van a carbohidratos.
+  const fatG = Math.round((kcalRounded * 0.25) / 9);
+  const carbG = Math.max(0, Math.round((kcalRounded - proteinG * 4 - fatG * 9) / 4));
   const sets =
     p.experience === 'novato' ? '10–12' : p.experience === 'intermedio' ? '12–16' : '16–20';
   return {
@@ -42,10 +56,26 @@ export function computeTargets(p: Profile): Targets {
     bmiLabel,
     bmr: Math.round(bmr),
     tdee: Math.round(tdee),
-    kcal: Math.round(kcal / 10) * 10,
-    proteinG: Math.round(p.weightKg * proteinPerKg),
+    kcal: kcalRounded,
+    proteinG,
+    carbG,
+    fatG,
     waterMl: Math.round((p.weightKg * 35) / 100) * 100,
     setsPerMuscleWeek: sets,
+  };
+}
+
+/** Objetivos de macros: si el usuario cargó objetivos propios (de su guía),
+ * los usa; si no, los deriva del perfil. */
+export function resolveMacroTargets(
+  targets: Targets,
+  override: Partial<MacroTargets> | null,
+): MacroTargets {
+  return {
+    kcal: override?.kcal ?? targets.kcal,
+    proteinG: override?.proteinG ?? targets.proteinG,
+    carbG: override?.carbG ?? targets.carbG,
+    fatG: override?.fatG ?? targets.fatG,
   };
 }
 

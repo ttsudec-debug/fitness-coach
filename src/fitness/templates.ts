@@ -110,7 +110,7 @@ export function generatePlan(p: Profile): Routine[] {
 
   if (p.daysPerWeek <= 3) {
     return days.map((d, i) => ({
-      name: `Full Body ${String.fromCharCode(65 + i)}`,
+      name: `Cuerpo completo ${String.fromCharCode(65 + i)}`,
       days: [d],
       exercises: mk(
         pool,
@@ -126,10 +126,10 @@ export function generatePlan(p: Profile): Routine[] {
     const upper: Slot[] = ['empuje_h', 'tiron_h', 'empuje_v', 'tiron_v', 'biceps'];
     const lower: Slot[] = ['sentadilla', 'bisagra', 'unilateral', 'core'];
     return [
-      { name: 'Upper A', days: [days[0]], exercises: mk(pool, upper, s) },
-      { name: 'Lower A', days: [days[1]], exercises: mk(pool, lower, s) },
-      { name: 'Upper B', days: [days[2]], exercises: mk(pool, [...upper].reverse(), s) },
-      { name: 'Lower B', days: [days[3]], exercises: mk(pool, [...lower].reverse(), s) },
+      { name: 'Tren superior A', days: [days[0]], exercises: mk(pool, upper, s) },
+      { name: 'Tren inferior A', days: [days[1]], exercises: mk(pool, lower, s) },
+      { name: 'Tren superior B', days: [days[2]], exercises: mk(pool, [...upper].reverse(), s) },
+      { name: 'Tren inferior B', days: [days[3]], exercises: mk(pool, [...lower].reverse(), s) },
     ];
   }
 
@@ -137,7 +137,7 @@ export function generatePlan(p: Profile): Routine[] {
   const pull: Slot[] = ['tiron_v', 'tiron_h', 'biceps', 'core'];
   const legs: Slot[] = ['sentadilla', 'bisagra', 'unilateral', 'core'];
   const blocks = [push, pull, legs];
-  const names = ['Push', 'Pull', 'Legs'];
+  const names = ['Empuje (pecho y hombro)', 'Tirón (espalda y bíceps)', 'Piernas'];
   return days.map((d, i) => ({
     name: `${names[i % 3]}${i >= 3 ? ' 2' : ''}`,
     days: [d],
