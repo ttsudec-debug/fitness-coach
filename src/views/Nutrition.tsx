@@ -98,6 +98,41 @@ export default function Nutrition() {
     () => (customRows ?? []).map((c) => ({ ...c, custom: true })),
     [customRows],
   );
+  const [webResults, setWebResults] = useState<Food[]>([]);
+  const [searchingOnline, setSearchingOnline] = useState(false);
+
+  async function handleSearchOnline() {
+    if (!query.trim()) return;
+    setSearchingOnline(true);
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=20`);
+      const data = await res.json();
+      if (data.products && data.products.length > 0) {
+        const mapped: Food[] = data.products.map((p: any) => ({
+          name: p.product_name_es || p.product_name || `Producto`,
+          cat: p.brands ? `Global (${p.brands})` : 'Base Mundial',
+          kcal: p.nutriments?.['energy-kcal_100g'] || 0,
+          protein: p.nutriments?.['proteins_100g'] || 0,
+          carbs: p.nutriments?.['carbohydrates_100g'] || 0,
+          fat: p.nutriments?.['fat_100g'] || 0,
+          custom: true
+        })).filter((p: Food) => p.name !== 'Producto' && p.kcal > 0);
+        
+        setWebResults(mapped);
+        if (mapped.length === 0) alert('No se encontraron productos con macros válidos.');
+      } else {
+        alert('No se encontraron resultados en la base mundial.');
+      }
+    } catch (e) {
+      alert('Error de conexión con la base mundial.');
+    }
+    setSearchingOnline(false);
+  }
+
+  const results = useMemo(() => {
+    if (!query.trim()) setWebResults([]);
+    return searchFoods(query, customFoods);
+  }, [query, customFoods]);
 
   if (!settings || !meals) return null;
 
@@ -254,10 +289,11 @@ export default function Nutrition() {
             </div>
           </div>
         ) : (
+          !picking && query && (
           <div className="food-results">
-            {results.map((f) => (
+            {results.map((f, i) => (
               <button
-                key={f.name}
+                key={i}
                 className="food-row"
                 onClick={() => {
                   setPicking(f);
@@ -274,7 +310,40 @@ export default function Nutrition() {
                 <span className="food-add">+</span>
               </button>
             ))}
+            
+            {webResults.map((f, i) => (
+              <button
+                key={'web'+i}
+                className="food-row"
+                onClick={() => {
+                  setPicking(f);
+                  setGrams('100');
+                }}
+              >
+                <div>
+                  <strong>{f.name}</strong>
+                  <span className="tag" style={{background: 'var(--cool)', color: 'var(--bg)'}}>internet</span>
+                  <p className="muted small-text">
+                    {f.cat} · {Math.round(f.kcal)} kcal/100 g
+                  </p>
+                </div>
+                <span className="food-add">+</span>
+              </button>
+            ))}
+
+            <div style={{ display: 'flex', gap: '8px', padding: '10px 0' }}>
+              <button 
+                className="btn primary" 
+                style={{ flex: 1 }} 
+                onClick={() => void handleSearchOnline()}
+                disabled={searchingOnline}
+              >
+                {searchingOnline ? 'Buscando...' : '🌐 Buscar en internet'}
+              </button>
+              <button className="btn ghost" onClick={() => setShowCustom(true)}>+ Manual</button>
+            </div>
           </div>
+        )
         )}
         <button className="btn small ghost" onClick={() => setShowCustom((v) => !v)}>
           {showCustom ? 'Cerrar' : '+ Crear comida propia'}
