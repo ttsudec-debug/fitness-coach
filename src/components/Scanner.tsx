@@ -30,11 +30,11 @@ export default function Scanner({ onResult, onCancel }: ScannerProps) {
         }
         
         await BarcodeScanner.removeAllListeners();
-        await BarcodeScanner.addListener('barcodeScanned', async (result) => {
-           if (active && result.barcode) {
+        await BarcodeScanner.addListener('barcodesScanned', async (event) => {
+           if (active && event.barcodes && event.barcodes.length > 0) {
               active = false;
               await stop();
-              onResult(result.barcode.rawValue);
+              onResult(event.barcodes[0].rawValue);
            }
         });
         
