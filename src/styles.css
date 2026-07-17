@@ -34,6 +34,7 @@ body {
   color: var(--ink);
   font-family: var(--body);
   -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
 }
 
 .app {
@@ -42,11 +43,13 @@ body {
   flex-direction: column;
   max-width: 520px;
   margin: 0 auto;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .content {
   flex: 1;
-  padding: 16px 16px calc(84px + env(safe-area-inset-bottom));
+  padding: calc(16px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px)) calc(84px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
 }
 
 /* entrada de cada pestaña */
