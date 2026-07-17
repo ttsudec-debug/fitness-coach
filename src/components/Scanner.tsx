@@ -29,12 +29,14 @@ export default function Scanner({ onResult, onCancel }: ScannerProps) {
           console.warn('No se pudo instalar el módulo de escáner. Puede que ya esté o no sea Android.', e);
         }
         
-        await BarcodeScanner.removeAllListeners();
         await BarcodeScanner.addListener('barcodesScanned', async (event) => {
            if (active && event.barcodes && event.barcodes.length > 0) {
-              active = false;
-              await stop();
-              onResult(event.barcodes[0].rawValue);
+              const code = event.barcodes[0].rawValue || event.barcodes[0].displayValue;
+              if (code) {
+                 active = false;
+                 await stop();
+                 onResult(code);
+              }
            }
         });
         
