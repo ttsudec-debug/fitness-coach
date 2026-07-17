@@ -1,7 +1,16 @@
 import { db, DAY_NAMES, getSetting } from '../db';
 import { computeTargets, type Profile } from '../fitness/metrics';
+import { personalRecords } from '../fitness/records';
+import { progressionSuggestions, deloadCheck } from '../fitness/progression';
 
-/** Arma el contexto que ve el coach: perfil + rutinas + últimos entrenamientos. */
+function addDays(iso: string, days: number): string {
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Arma el contexto que ve el coach: perfil + rutinas + progreso + últimos entrenamientos. */
 export async function buildCoachContext(): Promise<string> {
   const rawProfile = await getSetting('profile');
   let profileTxt = '(sin evaluación inicial)';
@@ -19,7 +28,35 @@ export async function buildCoachContext(): Promise<string> {
       .join('\n');
   }
   const routines = await db.routines.toArray();
+  const allWorkouts = await db.workouts.toArray();
   const recent = await db.workouts.orderBy('date').reverse().limit(10).toArray();
+
+  const records = [...personalRecords(allWorkouts).entries()]
+    .sort((a, b) => b[1].e1 - a[1].e1)
+    .slice(0, 10)
+    .map(([name, r]) => `- ${name}: ${r.weight} kg x ${r.reps} el ${r.date} (1RM estimada ${r.e1} kg)`)
+    .join('\n');
+
+  const suggestions = await progressionSuggestions();
+  const stalled = [...suggestions.entries()]
+    .filter(([, s]) => s.kind === 'deload')
+    .map(([name, s]) => `- ${name}: ${s.reason}`)
+    .join('\n');
+  const deload = await deloadCheck(suggestions);
+
+  const bodyLogs = await db.bodyLogs.orderBy('date').toArray();
+  let bodyTxt = '';
+  if (bodyLogs.length > 0) {
+    const last = bodyLogs[bodyLogs.length - 1];
+    bodyTxt = `Último peso corporal registrado: ${last.weightKg} kg (${last.date})`;
+    const monthAgo = bodyLogs.filter((l) => l.date <= addDays(last.date, -25)).pop();
+    if (monthAgo) {
+      const diff = Math.round((last.weightKg - monthAgo.weightKg) * 10) / 10;
+      bodyTxt += `; hace ~1 mes pesaba ${monthAgo.weightKg} kg (${diff > 0 ? '+' : ''}${diff} kg)`;
+    }
+    if (last.waistCm) bodyTxt += `. Cintura: ${last.waistCm} cm`;
+    bodyTxt += '.';
+  }
 
   const routinesTxt = routines
     .map((r) => {
@@ -57,5 +94,19 @@ export async function buildCoachContext(): Promise<string> {
     '',
     '=== ÚLTIMOS ENTRENAMIENTOS ===',
     recentTxt || '(sin entrenamientos registrados)',
+    '',
+    '=== RÉCORDS PERSONALES (mejor 1RM estimada, Epley) ===',
+    records || '(sin récords todavía)',
+    '',
+    '=== PESO CORPORAL ===',
+    bodyTxt || '(sin registros de peso corporal)',
+    '',
+    '=== ESTANCAMIENTO / FATIGA ===',
+    [
+      stalled || '(ningún ejercicio estancado)',
+      deload ? `Sugerencia de semana de descarga activa: ${deload}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n'),
   ].join('\n');
 }

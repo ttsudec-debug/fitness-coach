@@ -36,6 +36,13 @@ export interface Workout {
   finishedAt?: number;
 }
 
+export interface BodyLog {
+  id?: number;
+  date: string; // YYYY-MM-DD
+  weightKg: number;
+  waistCm?: number;
+}
+
 export interface Setting {
   key: string;
   value: string;
@@ -53,6 +60,7 @@ export const db = new Dexie('fitness-coach') as Dexie & {
   workouts: EntityTable<Workout, 'id'>;
   settings: EntityTable<Setting, 'key'>;
   chat: EntityTable<ChatMsg, 'id'>;
+  bodyLogs: EntityTable<BodyLog, 'id'>;
 };
 
 db.version(1).stores({
@@ -60,6 +68,10 @@ db.version(1).stores({
   workouts: '++id, date, routineId',
   settings: 'key',
   chat: '++id, ts',
+});
+
+db.version(2).stores({
+  bodyLogs: '++id, date',
 });
 
 export async function getSetting(key: string): Promise<string> {

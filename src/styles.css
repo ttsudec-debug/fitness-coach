@@ -405,6 +405,18 @@ input[type='checkbox'] {
   font-size: 9px;
 }
 
+.line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.dot {
+  fill: var(--accent);
+}
+
 .history-row {
   display: flex;
   align-items: center;
@@ -471,4 +483,102 @@ input[type='checkbox'] {
 
 .chat-input .btn {
   flex-shrink: 0;
+}
+
+/* ---------- fichas de ejercicios ---------- */
+.warn-text {
+  color: #fbbf24;
+  margin: 4px 0;
+}
+
+.icon-btn {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0 6px;
+  vertical-align: middle;
+}
+
+.ex-name-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.ex-name-row .ex-name {
+  margin-bottom: 0;
+}
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  background: var(--surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 520px;
+  max-height: 75dvh;
+  overflow-y: auto;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sheet h4 {
+  margin: 12px 0 6px;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sheet-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.chip-btn {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 0;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
 }

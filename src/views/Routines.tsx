@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, DAY_NAMES, type Routine } from '../db';
+import ExerciseSheet from '../components/ExerciseSheet';
+import { getExerciseInfo } from '../fitness/exercises';
 
 const EMPTY: Routine = {
   name: '',
@@ -11,6 +13,7 @@ const EMPTY: Routine = {
 export default function Routines() {
   const routines = useLiveQuery(() => db.routines.toArray(), []);
   const [editing, setEditing] = useState<Routine | null>(null);
+  const [sheet, setSheet] = useState<number | null>(null); // índice del ejercicio con ficha abierta
 
   if (!routines) return null;
 
@@ -70,16 +73,27 @@ export default function Routines() {
         <h3 className="section-title">Ejercicios</h3>
         {editing.exercises.map((ex, i) => (
           <div key={i} className="card exercise-edit">
-            <input
-              className="ex-name"
-              value={ex.name}
-              placeholder="Nombre del ejercicio"
-              onChange={(e) => {
-                const exercises = [...editing.exercises];
-                exercises[i] = { ...ex, name: e.target.value };
-                setEditing({ ...editing, exercises });
-              }}
-            />
+            <div className="ex-name-row">
+              <input
+                className="ex-name"
+                value={ex.name}
+                placeholder="Nombre del ejercicio"
+                onChange={(e) => {
+                  const exercises = [...editing.exercises];
+                  exercises[i] = { ...ex, name: e.target.value };
+                  setEditing({ ...editing, exercises });
+                }}
+              />
+              {getExerciseInfo(ex.name) && (
+                <button
+                  className="icon-btn"
+                  onClick={() => setSheet(i)}
+                  aria-label={`Técnica de ${ex.name}`}
+                >
+                  ℹ️
+                </button>
+              )}
+            </div>
             <div className="ex-nums">
               {(
                 [
@@ -131,6 +145,17 @@ export default function Routines() {
         >
           + Agregar ejercicio
         </button>
+        {sheet !== null && editing.exercises[sheet] && (
+          <ExerciseSheet
+            name={editing.exercises[sheet].name}
+            onClose={() => setSheet(null)}
+            onSubstitute={(newName) => {
+              const exercises = [...editing.exercises];
+              exercises[sheet] = { ...exercises[sheet], name: newName };
+              setEditing({ ...editing, exercises });
+            }}
+          />
+        )}
         <div className="actions">
           <button className="btn primary" onClick={() => void save()}>
             Guardar
@@ -154,7 +179,14 @@ export default function Routines() {
         <h1>Rutinas</h1>
       </header>
       {routines.map((r) => (
-        <section key={r.id} className="card" onClick={() => setEditing(structuredClone(r))}>
+        <section
+          key={r.id}
+          className="card"
+          onClick={() => {
+            setSheet(null);
+            setEditing(structuredClone(r));
+          }}
+        >
           <h3>{r.name}</h3>
           <p className="muted">
             {r.exercises.length} ejercicios · {r.days.map((d) => DAY_NAMES[d]).join(', ') || 'sin días'}

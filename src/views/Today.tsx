@@ -1,8 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, todayStr, DAY_NAMES, type Routine, type ExerciseLog } from '../db';
 import RestTimer from '../components/RestTimer';
-import { progressionSuggestions, type Suggestion } from '../fitness/progression';
+import ExerciseSheet from '../components/ExerciseSheet';
+import { progressionSuggestions, deloadCheck, type Suggestion } from '../fitness/progression';
+import { newPRs, type PR } from '../fitness/records';
+import { getExerciseInfo } from '../fitness/exercises';
+
+const HINT_ICON: Record<Suggestion['kind'], string> = { up: '↑ ', repeat: '↻ ', deload: '↓ ' };
+const HINT_CLASS: Record<Suggestion['kind'], string> = {
+  up: 'ok small-text',
+  repeat: 'muted small-text',
+  deload: 'warn-text small-text',
+};
 
 export default function Today() {
   const dow = new Date().getDay();
@@ -16,6 +26,13 @@ export default function Today() {
   const [rest, setRest] = useState<{ sec: number; id: number } | null>(null);
   const [startedAt, setStartedAt] = useState(0);
   const [hints, setHints] = useState<Map<string, Suggestion>>(new Map());
+  const [deloadMsg, setDeloadMsg] = useState<string | null>(null);
+  const [prs, setPrs] = useState<PR[]>([]);
+  const [sheet, setSheet] = useState<string | null>(null);
+
+  useEffect(() => {
+    void deloadCheck().then(setDeloadMsg);
+  }, [doneToday?.length]);
 
   if (!routines) return null;
   const todays = routines.filter((r) => r.days.includes(dow));
@@ -25,6 +42,7 @@ export default function Today() {
     setHints(sug);
     setActive(r);
     setStartedAt(Date.now());
+    setPrs([]);
     setLogs(
       r.exercises.map((e) => ({
         name: e.name,
@@ -59,6 +77,7 @@ export default function Today() {
 
   async function finish() {
     if (!active) return;
+    const records = await newPRs(logs, todayStr());
     await db.workouts.add({
       date: todayStr(),
       routineId: active.id!,
@@ -67,9 +86,11 @@ export default function Today() {
       startedAt,
       finishedAt: Date.now(),
     });
+    setPrs(records);
     setActive(null);
     setLogs([]);
     setRest(null);
+    setSheet(null);
   }
 
   if (active) {
@@ -88,10 +109,21 @@ export default function Today() {
         )}
         {logs.map((ex, ei) => (
           <section key={ei} className="card">
-            <h3>{ex.name}</h3>
+            <h3>
+              {ex.name}
+              {getExerciseInfo(ex.name) && (
+                <button
+                  className="icon-btn"
+                  onClick={() => setSheet(ex.name)}
+                  aria-label={`Técnica de ${ex.name}`}
+                >
+                  ℹ️
+                </button>
+              )}
+            </h3>
             {hints.get(ex.name) && (
-              <p className={hints.get(ex.name)!.up ? 'ok small-text' : 'muted small-text'}>
-                {hints.get(ex.name)!.up ? '↑ ' : '↻ '}
+              <p className={HINT_CLASS[hints.get(ex.name)!.kind]}>
+                {HINT_ICON[hints.get(ex.name)!.kind]}
                 {hints.get(ex.name)!.reason}
               </p>
             )}
@@ -122,6 +154,7 @@ export default function Today() {
             ))}
           </section>
         ))}
+        {sheet && <ExerciseSheet name={sheet} onClose={() => setSheet(null)} />}
         <div className="actions">
           <button className="btn primary" onClick={() => void finish()}>
             Terminar entrenamiento
@@ -142,6 +175,26 @@ export default function Today() {
           <p className="ok">✓ Ya entrenaste hoy: {doneToday.map((w) => w.routineName).join(', ')}</p>
         )}
       </header>
+      {prs.length > 0 && (
+        <div className="card ok">
+          <h3>🏆 ¡Récord personal!</h3>
+          {prs.map((p) => (
+            <p key={p.name} className="small-text">
+              {p.name}: {p.weight} kg × {p.reps} (1RM estimada {p.e1} kg)
+            </p>
+          ))}
+        </div>
+      )}
+      {deloadMsg && (
+        <div className="card warn">
+          <h3>🔋 Semana de descarga sugerida</h3>
+          <p className="small-text">{deloadMsg}</p>
+          <p className="muted small-text">
+            Esta semana entrená los mismos ejercicios con ~60 % del peso habitual y las mismas
+            series. Se recupera el cuerpo y volvés más fuerte.
+          </p>
+        </div>
+      )}
       {todays.length === 0 && (
         <div className="card">
           <p>Hoy no tenés rutina asignada. Día de descanso 😌</p>
