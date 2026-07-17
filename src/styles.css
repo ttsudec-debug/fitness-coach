@@ -262,7 +262,8 @@ h3 {
 }
 
 input,
-select {
+select,
+textarea {
   background: var(--surface-2);
   border: 1px solid transparent;
   border-radius: 10px;
@@ -273,8 +274,14 @@ select {
   font-family: var(--body);
 }
 
+textarea {
+  resize: vertical;
+  line-height: 1.4;
+}
+
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   outline: none;
   border-color: var(--accent);
 }
@@ -668,6 +675,65 @@ input[type='checkbox'] {
   border-radius: 12px;
 }
 
+/* ---------- mapa muscular ---------- */
+.muscle-map {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 8px;
+}
+
+.muscle-map .mm-base {
+  fill: var(--surface-3);
+}
+
+.muscle-map .mm {
+  fill: #3a4150;
+  transition: fill 0.2s ease;
+}
+
+.muscle-map .mm.secondary {
+  fill: rgba(242, 163, 60, 0.45);
+}
+
+.muscle-map .mm.primary {
+  fill: var(--accent);
+}
+
+.mm-caption {
+  fill: var(--ink-muted);
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mm-legend {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+.mm-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 5px;
+  vertical-align: -1px;
+}
+
+.mm-dot.primary {
+  background: var(--accent);
+}
+
+.mm-dot.secondary {
+  background: rgba(242, 163, 60, 0.45);
+}
+
 /* ---------- fichas de ejercicios ---------- */
 .warn-text {
   color: var(--accent);
@@ -890,6 +956,138 @@ input[type='checkbox'] {
 .music-chip {
   text-decoration: none;
   color: var(--ink);
+}
+
+/* ---------- nutrición ---------- */
+.macro-bar {
+  margin-bottom: 10px;
+}
+
+.macro-bar:last-child {
+  margin-bottom: 0;
+}
+
+.macro-bar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.macro-bar-val {
+  font-family: var(--display);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-bar-val .muted {
+  font-family: var(--body);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.macro-track {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.macro-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.macro-fill.over {
+  background: var(--danger);
+}
+
+.food-results {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.food-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--surface-2);
+  color: var(--ink);
+  padding: 8px 2px;
+  cursor: pointer;
+  font-family: var(--body);
+}
+
+.food-row strong {
+  font-weight: 600;
+}
+
+.food-add {
+  font-family: var(--display);
+  font-size: 1.4rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.tag {
+  display: inline-block;
+  background: var(--surface-3);
+  color: var(--ink-muted);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 6px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.pick-box,
+.guide-box {
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px 0;
+}
+
+.pick-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.pick-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 90px;
+}
+
+.pick-row label span {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+
+.pick-preview {
+  flex: 1;
+}
+
+.meal-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 /* ---------- coach ---------- */

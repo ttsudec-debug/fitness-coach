@@ -1,7 +1,8 @@
-import { db, DAY_NAMES, getSetting } from '../db';
-import { computeTargets, type Profile } from '../fitness/metrics';
+import { db, DAY_NAMES, getSetting, todayStr } from '../db';
+import { computeTargets, resolveMacroTargets, type Profile } from '../fitness/metrics';
 import { personalRecords } from '../fitness/records';
 import { progressionSuggestions, deloadCheck } from '../fitness/progression';
+import { getMacroOverride, sumMacros, MEAL_TYPES } from '../nutrition/log';
 
 function addDays(iso: string, days: number): string {
   const d = new Date(iso + 'T12:00:00');
@@ -58,6 +59,42 @@ export async function buildCoachContext(): Promise<string> {
     bodyTxt += '.';
   }
 
+  // Nutrición de hoy: objetivos vs. consumido + comidas + guía del usuario.
+  const todayMeals = await db.meals.where('date').equals(todayStr()).toArray();
+  const macroOverride = await getMacroOverride();
+  let nutritionTxt = '(sin registro de comidas hoy)';
+  const consumed = sumMacros(todayMeals);
+  const targets = rawProfile
+    ? resolveMacroTargets(computeTargets(JSON.parse(rawProfile) as Profile), macroOverride)
+    : macroOverride && macroOverride.kcal
+      ? {
+          kcal: macroOverride.kcal,
+          proteinG: macroOverride.proteinG ?? 0,
+          carbG: macroOverride.carbG ?? 0,
+          fatG: macroOverride.fatG ?? 0,
+        }
+      : null;
+  if (todayMeals.length > 0 || targets) {
+    const lines: string[] = [];
+    if (targets) {
+      lines.push(
+        `Objetivo: ${targets.kcal} kcal, ${targets.proteinG} g proteína, ${targets.carbG} g carbos, ${targets.fatG} g grasa.`,
+      );
+      lines.push(
+        `Consumido hoy: ${Math.round(consumed.kcal)} kcal, ${Math.round(consumed.protein)} g proteína, ${Math.round(consumed.carbs)} g carbos, ${Math.round(consumed.fat)} g grasa.`,
+      );
+      lines.push(
+        `Faltan: ${Math.max(0, targets.kcal - Math.round(consumed.kcal))} kcal, ${Math.max(0, targets.proteinG - Math.round(consumed.protein))} g proteína.`,
+      );
+    }
+    for (const mt of MEAL_TYPES) {
+      const items = todayMeals.filter((m) => m.meal === mt);
+      if (items.length) lines.push(`${mt}: ${items.map((i) => `${i.name} (${i.grams} g)`).join(', ')}`);
+    }
+    nutritionTxt = lines.join('\n');
+  }
+  const guide = await getSetting('nutritionGuide');
+
   const routinesTxt = routines
     .map((r) => {
       const days = r.days.map((d) => DAY_NAMES[d]).join(', ');
@@ -108,5 +145,11 @@ export async function buildCoachContext(): Promise<string> {
     ]
       .filter(Boolean)
       .join('\n'),
+    '',
+    '=== NUTRICIÓN DE HOY ===',
+    nutritionTxt,
+    '',
+    '=== GUÍA NUTRICIONAL DEL USUARIO ===',
+    guide || '(no cargó guía nutricional)',
   ].join('\n');
 }

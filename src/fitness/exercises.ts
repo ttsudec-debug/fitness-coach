@@ -4,6 +4,31 @@ export interface ExerciseInfo {
   mistake: string;
   substitutes: string[];
   anim?: string; // clave del pictograma animado en fitness/anims.ts
+  mg?: MuscleGroups; // músculos resaltados en el mapa
+}
+
+/** Claves de músculos del mapa corporal (frente y espalda). */
+export type MuscleKey =
+  | 'pecho'
+  | 'hombros'
+  | 'biceps'
+  | 'triceps'
+  | 'antebrazo'
+  | 'abdomen'
+  | 'oblicuos'
+  | 'trapecio'
+  | 'dorsal'
+  | 'espalda_alta'
+  | 'lumbar'
+  | 'gluteos'
+  | 'cuadriceps'
+  | 'isquios'
+  | 'gemelos'
+  | 'aductores';
+
+export interface MuscleGroups {
+  primary: MuscleKey[];
+  secondary: MuscleKey[];
 }
 
 /** Fichas de los ejercicios de las plantillas (gym / mancuernas / casa). */
@@ -475,10 +500,42 @@ const ANIM_KEYS: Record<string, string> = {
   'Curl femoral acostado': 'leg_curl',
 };
 
+/** Músculos trabajados según el patrón de movimiento (clave del pictograma). */
+function muscleGroupsForAnim(anim: string | undefined): MuscleGroups | undefined {
+  if (!anim) return undefined;
+  if (anim === 'leg_ext') return { primary: ['cuadriceps'], secondary: [] };
+  if (anim === 'leg_curl') return { primary: ['isquios'], secondary: ['gemelos'] };
+  if (/^(squat|leg_press)/.test(anim))
+    return { primary: ['cuadriceps', 'gluteos'], secondary: ['isquios', 'abdomen'] };
+  if (/^(hinge|smith_rdl|bridge)/.test(anim))
+    return { primary: ['isquios', 'gluteos'], secondary: ['lumbar'] };
+  if (/^(lunge|bulgarian)/.test(anim))
+    return { primary: ['cuadriceps', 'gluteos'], secondary: ['isquios', 'abdomen'] };
+  if (/^(bench|chest_press|pushup)/.test(anim))
+    return { primary: ['pecho'], secondary: ['triceps', 'hombros'] };
+  if (/^(ohp|shoulder_press|pike)/.test(anim))
+    return { primary: ['hombros'], secondary: ['triceps', 'trapecio'] };
+  if (/^(row|seated_row|pulldown|pullup|pullover)/.test(anim))
+    return { primary: ['dorsal', 'espalda_alta'], secondary: ['biceps', 'hombros'] };
+  if (/^(curl|cable_curl)/.test(anim))
+    return { primary: ['biceps'], secondary: ['antebrazo'] };
+  if (/^(triext|pushdown|dips)/.test(anim))
+    return { primary: ['triceps'], secondary: ['pecho', 'hombros'] };
+  if (anim === 'plank') return { primary: ['abdomen'], secondary: ['oblicuos', 'lumbar'] };
+  return undefined;
+}
+
+// Ejercicios sin pictograma que igual necesitan mapa muscular.
+const EXPLICIT_MG: Record<string, MuscleGroups> = {
+  'Aperturas en pec deck': { primary: ['pecho'], secondary: ['hombros'] },
+  Hiperextensiones: { primary: ['lumbar', 'gluteos'], secondary: ['isquios'] },
+};
+
 /** Ficha de un ejercicio, o undefined si es un nombre custom del usuario. */
 export function getExerciseInfo(name: string): ExerciseInfo | undefined {
   const clean = name.trim();
   const info = EXERCISE_INFO[clean];
   if (!info) return undefined;
-  return { ...info, anim: ANIM_KEYS[clean] };
+  const anim = ANIM_KEYS[clean];
+  return { ...info, anim, mg: EXPLICIT_MG[clean] ?? muscleGroupsForAnim(anim) };
 }

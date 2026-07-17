@@ -50,6 +50,28 @@ export interface ProgressPhoto {
   note?: string;
 }
 
+export interface MealEntry {
+  id?: number;
+  date: string; // YYYY-MM-DD
+  meal: string; // desayuno / almuerzo / once / cena / snack
+  name: string;
+  grams: number;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface CustomFood {
+  id?: number;
+  name: string;
+  cat: string;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
 export interface Setting {
   key: string;
   value: string;
@@ -69,6 +91,8 @@ export const db = new Dexie('fitness-coach') as Dexie & {
   chat: EntityTable<ChatMsg, 'id'>;
   bodyLogs: EntityTable<BodyLog, 'id'>;
   photos: EntityTable<ProgressPhoto, 'id'>;
+  meals: EntityTable<MealEntry, 'id'>;
+  customFoods: EntityTable<CustomFood, 'id'>;
 };
 
 db.version(1).stores({
@@ -84,6 +108,11 @@ db.version(2).stores({
 
 db.version(3).stores({
   photos: '++id, date',
+});
+
+db.version(4).stores({
+  meals: '++id, date',
+  customFoods: '++id, name',
 });
 
 export async function getSetting(key: string): Promise<string> {

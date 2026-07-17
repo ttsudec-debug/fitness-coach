@@ -83,8 +83,12 @@ export default function Settings() {
       workouts: await db.workouts.toArray(),
       chat: await db.chat.toArray(),
       bodyLogs: await db.bodyLogs.toArray(),
+      meals: await db.meals.toArray(),
+      customFoods: await db.customFoods.toArray(),
       profile: await getSetting('profile'),
       playlists: await getSetting('playlists'),
+      macroTargets: await getSetting('macroTargets'),
+      nutritionGuide: await getSetting('nutritionGuide'),
     };
     const encrypted = await encryptJson(data, pass);
     const blob = new Blob([encrypted], { type: 'application/octet-stream' });
@@ -105,15 +109,23 @@ export default function Settings() {
         workouts?: unknown[];
         chat?: unknown[];
         bodyLogs?: unknown[];
+        meals?: unknown[];
+        customFoods?: unknown[];
         profile?: string;
         playlists?: string;
+        macroTargets?: string;
+        nutritionGuide?: string;
       };
       if (Array.isArray(data.routines)) await db.routines.bulkPut(data.routines as never[]);
       if (Array.isArray(data.workouts)) await db.workouts.bulkPut(data.workouts as never[]);
       if (Array.isArray(data.chat)) await db.chat.bulkPut(data.chat as never[]);
       if (Array.isArray(data.bodyLogs)) await db.bodyLogs.bulkPut(data.bodyLogs as never[]);
+      if (Array.isArray(data.meals)) await db.meals.bulkPut(data.meals as never[]);
+      if (Array.isArray(data.customFoods)) await db.customFoods.bulkPut(data.customFoods as never[]);
       if (data.profile) await setSetting('profile', data.profile);
       if (data.playlists) await setSetting('playlists', data.playlists);
+      if (data.macroTargets) await setSetting('macroTargets', data.macroTargets);
+      if (data.nutritionGuide) await setSetting('nutritionGuide', data.nutritionGuide);
       flash('Datos importados ✓');
     } catch {
       flash('Contraseña incorrecta o archivo inválido');
