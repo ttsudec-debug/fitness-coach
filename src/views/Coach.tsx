@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
-import { GeminiProvider } from '../ai/coach';
+import { GeminiProvider, migrateGeminiModel, DEFAULT_GEMINI_MODEL } from '../ai/coach';
 import { buildCoachContext } from '../ai/context';
 
 export default function Coach() {
@@ -29,7 +29,9 @@ export default function Coach() {
     try {
       const key = (await db.settings.get('geminiApiKey'))?.value;
       if (!key) throw new Error('Configurá tu API key de Gemini en Ajustes.');
-      const model = (await db.settings.get('geminiModel'))?.value || 'gemini-2.5-flash';
+      const model = migrateGeminiModel(
+        (await db.settings.get('geminiModel'))?.value || DEFAULT_GEMINI_MODEL,
+      );
       const provider = new GeminiProvider(key, model);
       const history = (await db.chat.orderBy('ts').toArray())
         .slice(-20)
