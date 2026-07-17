@@ -339,6 +339,10 @@ input[type='checkbox'] {
   margin-bottom: 8px;
 }
 
+.ex-nums.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .ex-nums label {
   display: flex;
   flex-direction: column;

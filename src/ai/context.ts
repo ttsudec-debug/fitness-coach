@@ -1,7 +1,23 @@
-import { db, DAY_NAMES } from '../db';
+import { db, DAY_NAMES, getSetting } from '../db';
+import { computeTargets, type Profile } from '../fitness/metrics';
 
-/** Arma el contexto que ve el coach: rutinas + últimos entrenamientos. */
+/** Arma el contexto que ve el coach: perfil + rutinas + últimos entrenamientos. */
 export async function buildCoachContext(): Promise<string> {
+  const rawProfile = await getSetting('profile');
+  let profileTxt = '(sin evaluación inicial)';
+  if (rawProfile) {
+    const p = JSON.parse(rawProfile) as Profile;
+    const t = computeTargets(p);
+    profileTxt = [
+      `${p.sex === 'M' ? 'Hombre' : 'Mujer'}, ${p.age} años, ${p.weightKg} kg, ${p.heightCm} cm (IMC ${t.bmi}, ${t.bmiLabel}).`,
+      `Nivel: ${p.experience}. Objetivo: ${p.goal}. Entrena ${p.daysPerWeek} días/semana con ${p.equipment}.`,
+      `Trabaja de ${p.workStart} a ${p.workEnd}; prefiere entrenar ${p.trainWhen === 'antes' ? 'antes' : 'después'} del trabajo.`,
+      `Objetivos diarios: ~${t.kcal} kcal, ${t.proteinG} g proteína, ${(t.waterMl / 1000).toFixed(1)} L agua.`,
+      p.injuries ? `Lesiones/molestias: ${p.injuries}.` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }
   const routines = await db.routines.toArray();
   const recent = await db.workouts.orderBy('date').reverse().limit(10).toArray();
 
@@ -29,9 +45,12 @@ export async function buildCoachContext(): Promise<string> {
 
   return [
     'Eres un asesor fitness personal (coach). Respondes en español, de forma breve, práctica y motivadora.',
-    'Ayudas con rutinas, técnica, progresión de cargas, descanso y ajustes por molestias o lesiones leves.',
-    'Si el usuario menciona dolor persistente o lesión seria, recomiéndale consultar a un profesional de salud.',
+    'Ayudas con rutinas, técnica, progresión de cargas, descanso, y nutrición práctica alineada a los objetivos diarios del perfil.',
+    'Si el usuario menciona dolor persistente o lesión seria, recomiéndale consultar a un profesional de salud; en nutrición, da pautas generales saludables, no dietas médicas.',
     'No inventes datos del historial: usa solo lo que aparece abajo.',
+    '',
+    '=== PERFIL Y EVALUACIÓN ===',
+    profileTxt,
     '',
     '=== RUTINAS DEL USUARIO ===',
     routinesTxt || '(sin rutinas definidas)',

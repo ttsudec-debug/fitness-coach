@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, todayStr, DAY_NAMES, type Routine, type ExerciseLog } from '../db';
 import RestTimer from '../components/RestTimer';
+import { progressionSuggestions, type Suggestion } from '../fitness/progression';
 
 export default function Today() {
   const dow = new Date().getDay();
@@ -14,11 +15,14 @@ export default function Today() {
   const [logs, setLogs] = useState<ExerciseLog[]>([]);
   const [rest, setRest] = useState<{ sec: number; id: number } | null>(null);
   const [startedAt, setStartedAt] = useState(0);
+  const [hints, setHints] = useState<Map<string, Suggestion>>(new Map());
 
   if (!routines) return null;
   const todays = routines.filter((r) => r.days.includes(dow));
 
-  function start(r: Routine) {
+  async function start(r: Routine) {
+    const sug = await progressionSuggestions();
+    setHints(sug);
     setActive(r);
     setStartedAt(Date.now());
     setLogs(
@@ -26,7 +30,7 @@ export default function Today() {
         name: e.name,
         sets: Array.from({ length: e.sets }, () => ({
           reps: e.reps,
-          weight: e.weight,
+          weight: sug.get(e.name)?.weight ?? e.weight,
           done: false,
         })),
       })),
@@ -85,6 +89,12 @@ export default function Today() {
         {logs.map((ex, ei) => (
           <section key={ei} className="card">
             <h3>{ex.name}</h3>
+            {hints.get(ex.name) && (
+              <p className={hints.get(ex.name)!.up ? 'ok small-text' : 'muted small-text'}>
+                {hints.get(ex.name)!.up ? '↑ ' : '↻ '}
+                {hints.get(ex.name)!.reason}
+              </p>
+            )}
             {ex.sets.map((s, si) => (
               <div key={si} className={s.done ? 'set-row done' : 'set-row'}>
                 <button className="set-check" onClick={() => toggleSet(ei, si)}>
@@ -145,7 +155,7 @@ export default function Today() {
             {r.exercises.length} ejercicios ·{' '}
             {r.days.map((d) => DAY_NAMES[d]).join(', ')}
           </p>
-          <button className="btn primary" onClick={() => start(r)}>
+          <button className="btn primary" onClick={() => void start(r)}>
             Empezar
           </button>
         </section>

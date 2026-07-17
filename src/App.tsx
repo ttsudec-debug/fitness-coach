@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { seedIfEmpty, getSetting } from './db';
 import Today from './views/Today';
+import Plan from './views/Plan';
 import History from './views/History';
 import Routines from './views/Routines';
 import Coach from './views/Coach';
@@ -8,6 +9,7 @@ import Settings from './views/Settings';
 
 const TABS = [
   { id: 'hoy', label: 'Hoy', icon: '🏋️' },
+  { id: 'plan', label: 'Plan', icon: '📊' },
   { id: 'historial', label: 'Progreso', icon: '📈' },
   { id: 'rutinas', label: 'Rutinas', icon: '📋' },
   { id: 'coach', label: 'Coach', icon: '💬' },
@@ -52,6 +54,7 @@ export default function App() {
     <div className="app">
       <main className="content">
         {tab === 'hoy' && <Today />}
+        {tab === 'plan' && <Plan />}
         {tab === 'historial' && <History />}
         {tab === 'rutinas' && <Routines />}
         {tab === 'coach' && <Coach />}

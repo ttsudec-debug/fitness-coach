@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { db, getSetting, setSetting, todayStr } from '../db';
+import { encryptJson, decryptJson } from '../crypto';
 
 export default function Settings() {
   const [apiKey, setApiKey] = useState('');
@@ -52,28 +53,43 @@ export default function Settings() {
   }
 
   async function exportData() {
+    const pass = window.prompt(
+      'Elegí una contraseña para cifrar el respaldo (AES-256).\nSin ella no se puede recuperar:',
+    );
+    if (!pass) return;
     const data = {
       routines: await db.routines.toArray(),
       workouts: await db.workouts.toArray(),
       chat: await db.chat.toArray(),
+      profile: await getSetting('profile'),
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const encrypted = await encryptJson(data, pass);
+    const blob = new Blob([encrypted], { type: 'application/octet-stream' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `fitness-coach-backup-${todayStr()}.json`;
+    a.download = `fitness-coach-${todayStr()}.fcbak`;
     a.click();
     URL.revokeObjectURL(a.href);
+    flash('Respaldo cifrado exportado ✓');
   }
 
   async function importData(file: File) {
+    const pass = window.prompt('Contraseña del respaldo:');
+    if (!pass) return;
     try {
-      const data = JSON.parse(await file.text());
-      if (Array.isArray(data.routines)) await db.routines.bulkPut(data.routines);
-      if (Array.isArray(data.workouts)) await db.workouts.bulkPut(data.workouts);
-      if (Array.isArray(data.chat)) await db.chat.bulkPut(data.chat);
+      const data = (await decryptJson(await file.text(), pass)) as {
+        routines?: unknown[];
+        workouts?: unknown[];
+        chat?: unknown[];
+        profile?: string;
+      };
+      if (Array.isArray(data.routines)) await db.routines.bulkPut(data.routines as never[]);
+      if (Array.isArray(data.workouts)) await db.workouts.bulkPut(data.workouts as never[]);
+      if (Array.isArray(data.chat)) await db.chat.bulkPut(data.chat as never[]);
+      if (data.profile) await setSetting('profile', data.profile);
       flash('Datos importados ✓');
     } catch {
-      flash('Archivo inválido');
+      flash('Contraseña incorrecta o archivo inválido');
     }
   }
 
@@ -139,8 +155,8 @@ export default function Settings() {
       <section className="card">
         <h3>Tus datos</h3>
         <p className="muted small-text">
-          Todo se guarda solo en este dispositivo. Exportá un respaldo si vas a cambiar
-          de celular.
+          Todo se guarda solo en este dispositivo (nunca se sube a ningún servidor). El
+          respaldo se exporta cifrado con AES-256 y tu contraseña.
         </p>
         <div className="actions">
           <button className="btn ghost" onClick={() => void exportData()}>
@@ -150,7 +166,7 @@ export default function Settings() {
             Importar respaldo
             <input
               type="file"
-              accept="application/json"
+              accept=".fcbak,application/octet-stream,application/json"
               hidden
               onChange={(e) => {
                 const f = e.target.files?.[0];
