@@ -3,6 +3,7 @@ import { db, getSetting, setSetting, todayStr } from '../db';
 import { encryptJson, decryptJson } from '../crypto';
 import { migrateGeminiModel, DEFAULT_GEMINI_MODEL } from '../ai/coach';
 import { parsePlaylists, type Playlist } from '../components/MusicBar';
+import CloudSync from '../components/CloudSync';
 
 export default function Settings() {
   const [apiKey, setApiKey] = useState('');
@@ -151,6 +152,8 @@ export default function Settings() {
         <h1>Ajustes</h1>
       </header>
       {msg && <div className="card ok">{msg}</div>}
+
+      <CloudSync flash={flash} />
 
       <section className="card">
         <h3>Coach IA (Gemini)</h3>
