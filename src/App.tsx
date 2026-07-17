@@ -6,14 +6,22 @@ import History from './views/History';
 import Routines from './views/Routines';
 import Coach from './views/Coach';
 import Settings from './views/Settings';
+import {
+  IconDumbbell,
+  IconTarget,
+  IconTrend,
+  IconList,
+  IconChat,
+  IconGear,
+} from './components/icons';
 
 const TABS = [
-  { id: 'hoy', label: 'Hoy', icon: '🏋️' },
-  { id: 'plan', label: 'Plan', icon: '📊' },
-  { id: 'historial', label: 'Progreso', icon: '📈' },
-  { id: 'rutinas', label: 'Rutinas', icon: '📋' },
-  { id: 'coach', label: 'Coach', icon: '💬' },
-  { id: 'ajustes', label: 'Ajustes', icon: '⚙️' },
+  { id: 'hoy', label: 'Hoy', icon: IconDumbbell },
+  { id: 'plan', label: 'Plan', icon: IconTarget },
+  { id: 'historial', label: 'Progreso', icon: IconTrend },
+  { id: 'rutinas', label: 'Rutinas', icon: IconList },
+  { id: 'coach', label: 'Coach', icon: IconChat },
+  { id: 'ajustes', label: 'Ajustes', icon: IconGear },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -53,24 +61,31 @@ export default function App() {
   return (
     <div className="app">
       <main className="content">
-        {tab === 'hoy' && <Today />}
-        {tab === 'plan' && <Plan />}
-        {tab === 'historial' && <History />}
-        {tab === 'rutinas' && <Routines />}
-        {tab === 'coach' && <Coach />}
-        {tab === 'ajustes' && <Settings />}
+        <div key={tab} className="tab-pane">
+          {tab === 'hoy' && <Today />}
+          {tab === 'plan' && <Plan />}
+          {tab === 'historial' && <History />}
+          {tab === 'rutinas' && <Routines />}
+          {tab === 'coach' && <Coach />}
+          {tab === 'ajustes' && <Settings />}
+        </div>
       </main>
       <nav className="tabbar">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={tab === t.id ? 'tab active' : 'tab'}
-            onClick={() => setTab(t.id)}
-          >
-            <span className="tab-icon">{t.icon}</span>
-            <span>{t.label}</span>
-          </button>
-        ))}
+        {TABS.map((t) => {
+          const TabIcon = t.icon;
+          return (
+            <button
+              key={t.id}
+              className={tab === t.id ? 'tab active' : 'tab'}
+              onClick={() => setTab(t.id)}
+            >
+              <span className="tab-icon">
+                <TabIcon />
+              </span>
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
       </nav>
     </div>
   );

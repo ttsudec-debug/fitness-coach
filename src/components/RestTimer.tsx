@@ -19,24 +19,35 @@ export default function RestTimer({
     return () => clearTimeout(t);
   }, [left, onDone]);
 
-  const pct = Math.max(0, (left / seconds) * 100);
+  const frac = Math.max(0, left / seconds);
   const mm = Math.floor(left / 60);
   const ss = String(left % 60).padStart(2, '0');
 
   return (
     <div className="rest-timer">
-      <div className="rest-info">
-        <span>Descanso</span>
+      <svg viewBox="0 0 60 60" width="52" height="52" className="rest-ring" aria-hidden="true">
+        <circle cx="30" cy="30" r="25" className="track" />
+        <circle
+          cx="30"
+          cy="30"
+          r="25"
+          className="left"
+          pathLength={1}
+          strokeDasharray="1"
+          strokeDashoffset={1 - frac}
+          transform="rotate(-90 30 30)"
+        />
+      </svg>
+      <div className="rest-label">
+        <span className="muted small-text">Descanso</span>
+        <br />
         <strong>
           {mm}:{ss}
         </strong>
-        <button className="btn small ghost" onClick={onDone}>
-          Saltar
-        </button>
       </div>
-      <div className="rest-bar">
-        <div className="rest-fill" style={{ width: `${pct}%` }} />
-      </div>
+      <button className="btn small ghost" onClick={onDone}>
+        Saltar
+      </button>
     </div>
   );
 }
