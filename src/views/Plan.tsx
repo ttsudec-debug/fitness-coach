@@ -58,6 +58,7 @@ export default function Plan() {
   async function applyPlan() {
     if (!profile) return;
     const routines = generatePlan(profile);
+    await db.routines.clear();
     await db.routines.bulkAdd(routines);
     setMsg(`${routines.length} rutinas agregadas ✓ Cargá tus pesos iniciales en cada ejercicio; después la progresión te sugiere cuánto subir.`);
   }

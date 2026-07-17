@@ -13,56 +13,54 @@ type Slot =
   | 'triceps'
   | 'core';
 
-const POOLS: Record<Profile['equipment'], Record<Slot, string>> = {
-  // Máquinas estándar de la cadena Smart Fit: Smith, prensa, poleas y
-  // máquinas selectorizadas — ideal para entrenar sin esperar barras libres.
+const POOLS: Record<Profile['equipment'], Record<Slot, string[]>> = {
   smartfit: {
-    sentadilla: 'Sentadilla en Smith',
-    bisagra: 'Peso muerto rumano en Smith',
-    empuje_h: 'Press de pecho en máquina',
-    empuje_v: 'Press de hombros en máquina',
-    tiron_h: 'Remo sentado en polea',
-    tiron_v: 'Jalón al pecho',
-    unilateral: 'Prensa de piernas',
-    biceps: 'Curl en polea baja',
-    triceps: 'Extensión de tríceps en polea',
-    core: 'Plancha (seg)',
+    sentadilla: ['Prensa de piernas', 'Sentadilla en Smith'],
+    bisagra: ['Curl femoral acostado', 'Peso muerto rumano en Smith'],
+    empuje_h: ['Press de pecho en máquina', 'Aperturas en pec deck', 'Polea cruzada (Cruce de poleas)'],
+    empuje_v: ['Press de hombros en máquina'],
+    tiron_h: ['Remo en máquina', 'Remo sentado en polea'],
+    tiron_v: ['Jalón al pecho', 'Fly inverso en máquina'],
+    unilateral: ['Máquina de Abductores', 'Máquina de Aductores'],
+    biceps: ['Curl de bíceps en máquina (Predicador)', 'Curl en polea baja'],
+    triceps: ['Extensión de tríceps en polea'],
+    core: ['Elevación de gemelos en máquina', 'Plancha (seg)'],
   },
   gym: {
-    sentadilla: 'Sentadilla con barra',
-    bisagra: 'Peso muerto rumano',
-    empuje_h: 'Press banca',
-    empuje_v: 'Press militar',
-    tiron_h: 'Remo con barra',
-    tiron_v: 'Jalón al pecho',
-    unilateral: 'Zancadas con mancuernas',
-    biceps: 'Curl con barra',
-    triceps: 'Fondos en paralelas',
-    core: 'Plancha (seg)',
+    sentadilla: ['Sentadilla con barra'],
+    bisagra: ['Peso muerto rumano'],
+    empuje_h: ['Press banca'],
+    empuje_v: ['Press militar'],
+    tiron_h: ['Remo con barra'],
+    tiron_v: ['Jalón al pecho'],
+    unilateral: ['Zancadas con mancuernas'],
+    biceps: ['Curl con barra'],
+    triceps: ['Fondos en paralelas'],
+    core: ['Plancha (seg)'],
   },
   mancuernas: {
-    sentadilla: 'Sentadilla goblet',
-    bisagra: 'Peso muerto rumano c/ mancuernas',
-    empuje_h: 'Press banca c/ mancuernas',
-    empuje_v: 'Press militar c/ mancuernas',
-    tiron_h: 'Remo a un brazo',
-    tiron_v: 'Pull-over c/ mancuerna',
-    unilateral: 'Zancadas c/ mancuernas',
-    biceps: 'Curl alterno',
-    triceps: 'Extensión tras nuca',
-    core: 'Plancha (seg)',
+    sentadilla: ['Sentadilla goblet'],
+    bisagra: ['Peso muerto rumano c/ mancuernas'],
+    empuje_h: ['Press banca c/ mancuernas'],
+    empuje_v: ['Press militar c/ mancuernas'],
+    tiron_h: ['Remo a un brazo'],
+    tiron_v: ['Pull-over c/ mancuerna'],
+    unilateral: ['Zancadas c/ mancuernas'],
+    biceps: ['Curl alterno'],
+    triceps: ['Extensión tras nuca'],
+    core: ['Plancha (seg)'],
   },
   casa: {
-    sentadilla: 'Sentadilla al aire',
-    bisagra: 'Puente de glúteos',
-    empuje_h: 'Flexiones',
-    empuje_v: 'Flexiones pica',
-    tiron_h: 'Remo invertido (mesa)',
-    tiron_v: 'Dominadas (o negativas)',
-    unilateral: 'Sentadilla búlgara',
-    biceps: 'Curl con mochila',
-    triceps: 'Fondos en silla',
-    core: 'Plancha (seg)',
+    sentadilla: ['Sentadilla al aire'],
+    bisagra: ['Puente de glúteos'],
+    empuje_h: ['Flexiones'],
+    empuje_v: ['Flexiones pica'],
+    tiron_h: ['Remo invertido (mesa)'],
+    tiron_v: ['Dominadas (o negativas)'],
+    unilateral: ['Sentadilla búlgara'],
+    biceps: ['Curl con mochila'],
+    triceps: ['Fondos en silla'],
+    core: ['Plancha (seg)'],
   },
 };
 
@@ -91,14 +89,19 @@ const DAY_SPREAD: Record<number, number[]> = {
   6: [1, 2, 3, 4, 5, 6],
 };
 
-function mk(pool: Record<Slot, string>, slots: Slot[], s: Scheme): Exercise[] {
-  return slots.map((slot) => ({
-    name: pool[slot],
-    sets: s.sets,
-    reps: slot === 'core' ? 45 : s.reps,
-    weight: 0, // el usuario carga su peso inicial; la progresión hace el resto
-    restSec: slot === 'core' ? 60 : s.restSec,
-  }));
+function mk(pool: Record<Slot, string[]>, slots: Slot[], s: Scheme, dayIndex: number): Exercise[] {
+  return slots.map((slot, i) => {
+    const opts = pool[slot];
+    // Usamos el índice del día y el slot para alternar ejercicios y dar variedad
+    const exName = opts[(dayIndex + i) % opts.length];
+    return {
+      name: exName,
+      sets: s.sets,
+      reps: slot === 'core' ? 45 : s.reps,
+      weight: 0,
+      restSec: slot === 'core' ? 60 : s.restSec,
+    };
+  });
 }
 
 /** Genera el plan recomendado según días disponibles (plantillas estándar:
@@ -118,6 +121,7 @@ export function generatePlan(p: Profile): Routine[] {
           ? ['sentadilla', 'empuje_h', 'tiron_h', 'empuje_v', 'core']
           : ['bisagra', 'empuje_v', 'tiron_v', 'unilateral', 'core'],
         s,
+        i
       ),
     }));
   }
@@ -126,10 +130,10 @@ export function generatePlan(p: Profile): Routine[] {
     const upper: Slot[] = ['empuje_h', 'tiron_h', 'empuje_v', 'tiron_v', 'biceps'];
     const lower: Slot[] = ['sentadilla', 'bisagra', 'unilateral', 'core'];
     return [
-      { name: 'Tren superior A', days: [days[0]], exercises: mk(pool, upper, s) },
-      { name: 'Tren inferior A', days: [days[1]], exercises: mk(pool, lower, s) },
-      { name: 'Tren superior B', days: [days[2]], exercises: mk(pool, [...upper].reverse(), s) },
-      { name: 'Tren inferior B', days: [days[3]], exercises: mk(pool, [...lower].reverse(), s) },
+      { name: 'Tren superior A', days: [days[0]], exercises: mk(pool, upper, s, 0) },
+      { name: 'Tren inferior A', days: [days[1]], exercises: mk(pool, lower, s, 0) },
+      { name: 'Tren superior B', days: [days[2]], exercises: mk(pool, [...upper].reverse(), s, 1) },
+      { name: 'Tren inferior B', days: [days[3]], exercises: mk(pool, [...lower].reverse(), s, 1) },
     ];
   }
 
@@ -141,6 +145,6 @@ export function generatePlan(p: Profile): Routine[] {
   return days.map((d, i) => ({
     name: `${names[i % 3]}${i >= 3 ? ' 2' : ''}`,
     days: [d],
-    exercises: mk(pool, blocks[i % 3], s),
+    exercises: mk(pool, blocks[i % 3], s, i),
   }));
 }

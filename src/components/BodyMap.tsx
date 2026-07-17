@@ -6,6 +6,7 @@ interface Props {
   selectedMuscle?: string | null;
   activeRegions?: string[];
   readonly?: boolean;
+  forceView?: 'front' | 'back';
 }
 
 const SLUG_MAP: Record<string, string> = {
@@ -43,8 +44,8 @@ const REVERSE_MAP: Record<string, string> = Object.entries(SLUG_MAP).reduce((acc
   return acc;
 }, {} as Record<string, string>);
 
-export function BodyMap({ onSelectMuscle, selectedMuscle, activeRegions = [], readonly = false }: Props) {
-  const [view, setView] = useState<'front' | 'back'>('front');
+export function BodyMap({ onSelectMuscle, selectedMuscle, activeRegions = [], readonly = false, forceView }: Props) {
+  const [view, setView] = useState<'front' | 'back'>(forceView || 'front');
 
   const activeColor = '#FF5216'; // Naranja Strava vibrante
 
@@ -67,18 +68,20 @@ export function BodyMap({ onSelectMuscle, selectedMuscle, activeRegions = [], re
     }
   }
 
+  const currentView = forceView || view;
+
   return (
     <div className="body-map-container" style={{ textAlign: 'center', margin: readonly ? '0' : '20px 0' }}>
-      {!readonly && (
+      {!readonly && !forceView && (
         <div className="segmented-control" style={{ marginBottom: '20px' }}>
           <button 
-            className={`btn small ${view === 'front' ? 'primary' : 'ghost'}`} 
+            className={`btn small ${currentView === 'front' ? 'primary' : 'ghost'}`} 
             onClick={() => setView('front')}
           >
             Vista Frontal
           </button>
           <button 
-            className={`btn small ${view === 'back' ? 'primary' : 'ghost'}`} 
+            className={`btn small ${currentView === 'back' ? 'primary' : 'ghost'}`} 
             onClick={() => setView('back')}
           >
             Vista Trasera
@@ -89,7 +92,7 @@ export function BodyMap({ onSelectMuscle, selectedMuscle, activeRegions = [], re
       <div className="svg-wrapper" style={{ display: 'inline-block', position: 'relative' }}>
         <Body
           data={data}
-          side={view}
+          side={currentView}
           scale={readonly ? 1 : 1.3}
           defaultFill="var(--surface-3)"
           defaultStroke="#000"
