@@ -39,6 +39,8 @@ function MacroBar({
   );
 }
 
+import Scanner from '../components/Scanner';
+
 const EMPTY_CUSTOM = { name: '', cat: 'Otros', kcal: '', protein: '', carbs: '', fat: '' };
 
 export default function Nutrition() {
@@ -58,6 +60,39 @@ export default function Nutrition() {
   const [showCustom, setShowCustom] = useState(false);
   const [custom, setCustom] = useState(EMPTY_CUSTOM);
   const [showGuide, setShowGuide] = useState(false);
+  const [scanning, setScanning] = useState(false);
+
+  async function handleScan(barcode: string) {
+    setScanning(false);
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await res.json();
+      
+      if (data.status === 1 && data.product) {
+        const p = data.product;
+        const nut = p.nutriments || {};
+        
+        // OpenFoodFacts suele entregar macros por 100g en la propiedad "[nutriente]_100g"
+        const foundFood: Food = {
+          name: p.product_name_es || p.product_name || `Producto (${barcode})`,
+          cat: p.brands ? `Supermercado (${p.brands})` : 'Escaneado',
+          kcal: nut['energy-kcal_100g'] || 0,
+          protein: nut['proteins_100g'] || 0,
+          carbs: nut['carbohydrates_100g'] || 0,
+          fat: nut['fat_100g'] || 0,
+          custom: true // Lo marcamos custom para que se vea diferente
+        };
+        
+        setPicking(foundFood);
+        setGrams('100');
+      } else {
+        alert('Producto no encontrado en la base mundial. Por favor ingrésalo manualmente.');
+        setShowCustom(true);
+      }
+    } catch (e) {
+      alert('Error de conexión al buscar el código de barras.');
+    }
+  }
 
   const customFoods: Food[] = useMemo(
     () => (customRows ?? []).map((c) => ({ ...c, custom: true })),
@@ -157,14 +192,34 @@ export default function Nutrition() {
             </button>
           ))}
         </div>
-        <input
-          value={query}
-          placeholder="Buscar comida (pollo, arroz, palta…)"
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setPicking(null);
-          }}
-        />
+        
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+          <input
+            style={{ flex: 1 }}
+            value={query}
+            placeholder="Buscar comida (pollo, arroz, palta…)"
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPicking(null);
+            }}
+          />
+          <button 
+            className="btn ghost" 
+            style={{ padding: '0 12px', fontSize: '1.2rem' }}
+            onClick={() => setScanning(true)}
+            aria-label="Escanear Código"
+          >
+            📷
+          </button>
+        </div>
+
+        {scanning && (
+          <Scanner 
+            onCancel={() => setScanning(false)}
+            onResult={(code) => void handleScan(code)}
+          />
+        )}
+        
         {picking ? (
           <div className="pick-box">
             <strong>{picking.name}</strong>

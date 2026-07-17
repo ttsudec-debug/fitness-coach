@@ -1267,3 +1267,46 @@ input[type='checkbox'] {
     animation: none;
   }
 }
+
+/* ---------- Lector de Códigos de Barras ---------- */
+body.barcode-scanner-active {
+  background: transparent !important;
+}
+
+body.barcode-scanner-active .app {
+  visibility: hidden;
+}
+
+.scanner-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  visibility: visible;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.scanner-ui {
+  text-align: center;
+  width: 100%;
+}
+
+.scanner-frame {
+  width: 250px;
+  height: 150px;
+  border: 4px solid var(--accent);
+  border-radius: 20px;
+  margin: 0 auto 20px;
+  box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.7);
+}
+
+.scanner-text {
+  margin: 16px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.scanner-cancel {
+  margin-top: 30px;
+}
