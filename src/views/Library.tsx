@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BodyMap } from '../components/BodyMap';
-import type { MuscleGroup } from '../exercises'; // Mantengo esto por compatibilidad del mapa
 import { EXERCISE_INFO, getExerciseInfo } from '../fitness/exercises';
 import ExerciseSheet from '../components/ExerciseSheet';
 

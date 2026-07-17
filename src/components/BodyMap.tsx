@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { MuscleGroup } from '../exercises';
 
 interface Props {
@@ -12,7 +12,6 @@ export function BodyMap({ onSelectMuscle, selectedMuscle }: Props) {
   // Colores para los SVG
   const baseColor = 'var(--surface-3)';
   const activeColor = 'var(--accent)';
-  const hoverColor = 'var(--cool)';
 
   function fillFor(muscle: MuscleGroup) {
     return selectedMuscle === muscle ? activeColor : baseColor;
