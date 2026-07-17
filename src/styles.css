@@ -768,6 +768,43 @@ input[type='checkbox'] {
   cursor: pointer;
 }
 
+/* ---------- minutero ---------- */
+.timer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.timer-time {
+  font-family: var(--display);
+  font-stretch: 112%;
+  font-size: 1.9rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  flex: 1;
+}
+
+.timer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timer-chip {
+  border: 0;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--display);
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.timer-chip.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
 /* ---------- fotos de evolución ---------- */
 .photo-grid {
   display: grid;

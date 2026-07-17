@@ -10,6 +10,7 @@ import { newPRs, type PR } from '../fitness/records';
 import { getExerciseInfo } from '../fitness/exercises';
 import { warmupFor, stretchFor, type MobilityItem } from '../fitness/warmup';
 import MusicBar from '../components/MusicBar';
+import CountdownTimer from '../components/CountdownTimer';
 
 const HINT_ICON: Record<Suggestion['kind'], string> = { up: '↑ ', repeat: '↻ ', deload: '↓ ' };
 const HINT_CLASS: Record<Suggestion['kind'], string> = {
@@ -170,11 +171,17 @@ export default function Today() {
       <div className="view">
         <header className="view-head">
           <div>
-            <p className="eyebrow">Calentamiento · 5 min</p>
+            <p className="eyebrow">Cardio y calentamiento</p>
             <h1>{active.name}</h1>
           </div>
         </header>
         <MusicBar />
+        <CountdownTimer
+          label="Cardio inicial"
+          presets={[600, 1200, 1500, 1800]}
+          defaultSec={1500}
+          settingKey="cardioSec"
+        />
         <p className="muted small-text">
           Entrar en calor sube el rendimiento y baja el riesgo de lesión. Marcá lo que vayas
           haciendo.
@@ -198,7 +205,7 @@ export default function Today() {
         {prs.length > 0 && <Confetti />}
         <header className="view-head">
           <div>
-            <p className="eyebrow">Estiramiento · 5 min</p>
+            <p className="eyebrow">Estiramiento</p>
             <h1>Bien ahí</h1>
           </div>
         </header>
@@ -212,6 +219,12 @@ export default function Today() {
             ))}
           </div>
         )}
+        <CountdownTimer
+          label="Sostené cada posición"
+          presets={[30, 45, 60]}
+          defaultSec={30}
+          settingKey="stretchSec"
+        />
         <p className="muted small-text">
           Entrenamiento guardado. Cerrá con estos estiramientos suaves: sin rebotes, sin dolor.
         </p>
@@ -237,6 +250,16 @@ export default function Today() {
             </p>
             <h1>{active.name}</h1>
           </div>
+          {!rest && (
+            <button
+              className="btn small ghost"
+              onClick={() =>
+                setRest({ sec: active.exercises[0]?.restSec ?? 90, id: Date.now() })
+              }
+            >
+              Descanso
+            </button>
+          )}
         </header>
         {rest && (
           <RestTimer key={rest.id} seconds={rest.sec} onDone={() => setRest(null)} />
