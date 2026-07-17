@@ -1,22 +1,43 @@
 import { useEffect, useState } from 'react';
 import { db, getSetting, setSetting, todayStr } from '../db';
 import { encryptJson, decryptJson } from '../crypto';
+import { migrateGeminiModel, DEFAULT_GEMINI_MODEL } from '../ai/coach';
+import { parsePlaylists, type Playlist } from '../components/MusicBar';
 
 export default function Settings() {
   const [apiKey, setApiKey] = useState('');
-  const [model, setModel] = useState('gemini-2.5-flash');
+  const [model, setModel] = useState(DEFAULT_GEMINI_MODEL);
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [reminderTime, setReminderTime] = useState('19:00');
   const [msg, setMsg] = useState('');
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [plName, setPlName] = useState('');
+  const [plUrl, setPlUrl] = useState('');
 
   useEffect(() => {
     void (async () => {
       setApiKey(await getSetting('geminiApiKey'));
-      setModel((await getSetting('geminiModel')) || 'gemini-2.5-flash');
+      setModel(migrateGeminiModel(await getSetting('geminiModel')));
       setReminderEnabled((await getSetting('reminderEnabled')) === '1');
       setReminderTime((await getSetting('reminderTime')) || '19:00');
+      setPlaylists(parsePlaylists((await getSetting('playlists')) || '[]'));
     })();
   }, []);
+
+  async function savePlaylists(next: Playlist[]) {
+    setPlaylists(next);
+    await setSetting('playlists', JSON.stringify(next));
+  }
+
+  async function addPlaylist() {
+    const name = plName.trim();
+    let url = plUrl.trim();
+    if (!name || !url) return;
+    if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+    await savePlaylists([...playlists, { name, url }]);
+    setPlName('');
+    setPlUrl('');
+  }
 
   function flash(text: string) {
     setMsg(text);
@@ -61,7 +82,9 @@ export default function Settings() {
       routines: await db.routines.toArray(),
       workouts: await db.workouts.toArray(),
       chat: await db.chat.toArray(),
+      bodyLogs: await db.bodyLogs.toArray(),
       profile: await getSetting('profile'),
+      playlists: await getSetting('playlists'),
     };
     const encrypted = await encryptJson(data, pass);
     const blob = new Blob([encrypted], { type: 'application/octet-stream' });
@@ -81,12 +104,16 @@ export default function Settings() {
         routines?: unknown[];
         workouts?: unknown[];
         chat?: unknown[];
+        bodyLogs?: unknown[];
         profile?: string;
+        playlists?: string;
       };
       if (Array.isArray(data.routines)) await db.routines.bulkPut(data.routines as never[]);
       if (Array.isArray(data.workouts)) await db.workouts.bulkPut(data.workouts as never[]);
       if (Array.isArray(data.chat)) await db.chat.bulkPut(data.chat as never[]);
+      if (Array.isArray(data.bodyLogs)) await db.bodyLogs.bulkPut(data.bodyLogs as never[]);
       if (data.profile) await setSetting('profile', data.profile);
+      if (data.playlists) await setSetting('playlists', data.playlists);
       flash('Datos importados ✓');
     } catch {
       flash('Contraseña incorrecta o archivo inválido');
@@ -119,12 +146,59 @@ export default function Settings() {
         <label className="field">
           <span>Modelo</span>
           <select value={model} onChange={(e) => setModel(e.target.value)}>
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash (recomendado)</option>
-            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+            <option value="gemini-3.5-flash">Gemini 3.5 Flash (recomendado)</option>
+            <option value="gemini-3.1-pro">Gemini 3.1 Pro</option>
+            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite (más barato)</option>
+            <option value="gemini-flash-latest">Siempre el Flash más nuevo</option>
           </select>
         </label>
         <button className="btn primary" onClick={() => void saveAI()}>
           Guardar
+        </button>
+      </section>
+
+      <section className="card">
+        <h3>Música para entrenar</h3>
+        <p className="muted small-text">
+          Guardá tus playlists de Spotify, YouTube Music o cualquier servicio (pegá el link de
+          compartir). Aparecen como accesos rápidos al empezar a entrenar y se abren en tu app de
+          música.
+        </p>
+        {playlists.map((p, i) => (
+          <div key={i} className="history-row">
+            <div>
+              <strong>{p.name}</strong>
+              <p className="muted small-text">{p.url}</p>
+            </div>
+            <button
+              className="btn small ghost"
+              onClick={() => void savePlaylists(playlists.filter((_, x) => x !== i))}
+              aria-label={`Quitar ${p.name}`}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <div className="ex-nums two">
+          <label>
+            <input
+              value={plName}
+              placeholder="Ej: Piernas a fondo"
+              onChange={(e) => setPlName(e.target.value)}
+            />
+            <span>nombre</span>
+          </label>
+          <label>
+            <input
+              value={plUrl}
+              placeholder="https://open.spotify.com/…"
+              onChange={(e) => setPlUrl(e.target.value)}
+            />
+            <span>link</span>
+          </label>
+        </div>
+        <button className="btn small" disabled={!plName.trim() || !plUrl.trim()} onClick={() => void addPlaylist()}>
+          Agregar playlist
         </button>
       </section>
 
@@ -156,7 +230,8 @@ export default function Settings() {
         <h3>Tus datos</h3>
         <p className="muted small-text">
           Todo se guarda solo en este dispositivo (nunca se sube a ningún servidor). El
-          respaldo se exporta cifrado con AES-256 y tu contraseña.
+          respaldo se exporta cifrado con AES-256 y tu contraseña. Las fotos de evolución no
+          se incluyen en el respaldo (ocupan mucho): guardalas aparte si cambiás de teléfono.
         </p>
         <div className="actions">
           <button className="btn ghost" onClick={() => void exportData()}>

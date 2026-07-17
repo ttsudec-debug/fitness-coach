@@ -12,9 +12,9 @@ type Pattern = 'piernas' | 'empuje' | 'tiron' | 'core';
 function patternOf(name: string): Pattern | null {
   const anim = getExerciseInfo(name)?.anim;
   if (!anim) return null;
-  if (/^(squat|hinge|bridge|lunge|bulgarian)/.test(anim)) return 'piernas';
-  if (/^(bench|pushup|ohp|pike|dips|triext)/.test(anim)) return 'empuje';
-  if (/^(row|pull|curl)/.test(anim)) return 'tiron';
+  if (/^(squat|hinge|bridge|lunge|bulgarian|smith|leg_)/.test(anim)) return 'piernas';
+  if (/^(bench|pushup|ohp|pike|dips|triext|chest|shoulder|pushdown)/.test(anim)) return 'empuje';
+  if (/^(row|pull|curl|seated_row|cable)/.test(anim)) return 'tiron';
   return 'core';
 }
 

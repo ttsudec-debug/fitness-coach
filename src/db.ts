@@ -43,6 +43,13 @@ export interface BodyLog {
   waistCm?: number;
 }
 
+export interface ProgressPhoto {
+  id?: number;
+  date: string; // YYYY-MM-DD
+  blob: Blob; // JPEG reescalada, solo en este dispositivo
+  note?: string;
+}
+
 export interface Setting {
   key: string;
   value: string;
@@ -61,6 +68,7 @@ export const db = new Dexie('fitness-coach') as Dexie & {
   settings: EntityTable<Setting, 'key'>;
   chat: EntityTable<ChatMsg, 'id'>;
   bodyLogs: EntityTable<BodyLog, 'id'>;
+  photos: EntityTable<ProgressPhoto, 'id'>;
 };
 
 db.version(1).stores({
@@ -72,6 +80,10 @@ db.version(1).stores({
 
 db.version(2).stores({
   bodyLogs: '++id, date',
+});
+
+db.version(3).stores({
+  photos: '++id, date',
 });
 
 export async function getSetting(key: string): Promise<string> {

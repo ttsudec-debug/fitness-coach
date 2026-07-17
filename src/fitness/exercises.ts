@@ -305,6 +305,131 @@ export const EXERCISE_INFO: Record<string, ExerciseInfo> = {
   },
 };
 
+// ---------- máquinas (Smart Fit) ----------
+Object.assign(EXERCISE_INFO, {
+  'Sentadilla en Smith': {
+    muscles: 'Cuádriceps, glúteos, core',
+    technique: [
+      'Barra sobre trapecios, pies un paso adelante de la vertical de la barra.',
+      'Destrabá girando las muñecas y bajá controlado hasta el paralelo.',
+      'Empujá con todo el pie; la máquina guía el recorrido.',
+      'Al terminar, girá las muñecas para enganchar la barra en el seguro.',
+    ],
+    mistake: 'Pararse justo debajo de la barra: en Smith los pies van adelante.',
+    substitutes: ['Prensa de piernas', 'Sentadilla goblet', 'Sentadilla con barra'],
+  },
+  'Peso muerto rumano en Smith': {
+    muscles: 'Isquiotibiales, glúteos, espalda baja',
+    technique: [
+      'Barra al frente de los muslos, rodillas apenas flexionadas.',
+      'Llevá la cadera bien atrás con la espalda neutra; la barra roza las piernas.',
+      'Bajá hasta media canilla y subí apretando glúteos.',
+    ],
+    mistake: 'Redondear la espalda para bajar más de la cuenta.',
+    substitutes: ['Hiperextensiones', 'Curl femoral acostado', 'Peso muerto rumano'],
+  },
+  'Press de pecho en máquina': {
+    muscles: 'Pectorales, tríceps, hombro frontal',
+    technique: [
+      'Ajustá el asiento: las manijas a la altura del pecho.',
+      'Espalda pegada al respaldo, empujá hasta extender sin bloquear codos.',
+      'Volvé controlado hasta sentir el estiramiento del pecho.',
+    ],
+    mistake: 'Asiento muy bajo o muy alto: cambia el músculo que trabaja.',
+    substitutes: ['Aperturas en pec deck', 'Press banca c/ mancuernas', 'Flexiones'],
+  },
+  'Press de hombros en máquina': {
+    muscles: 'Hombros, tríceps',
+    technique: [
+      'Asiento ajustado: manijas a la altura de las orejas.',
+      'Empujá arriba sin despegar la espalda del respaldo.',
+      'Bajá controlado hasta la altura inicial, sin rebotar abajo.',
+    ],
+    mistake: 'Arquear la espalda baja para empujar más peso.',
+    substitutes: ['Press militar c/ mancuernas', 'Press militar'],
+  },
+  'Remo sentado en polea': {
+    muscles: 'Dorsales, romboides, bíceps',
+    technique: [
+      'Pies firmes en las plataformas, rodillas semiflexionadas, torso vertical.',
+      'Tirá la manija al ombligo llevando los codos pegados al cuerpo.',
+      'Juntá las escápulas al final; volvé controlado sin dejarte arrastrar.',
+    ],
+    mistake: 'Hamacarse con el torso para mover más peso.',
+    substitutes: ['Remo a un brazo', 'Remo con barra', 'Jalón al pecho'],
+  },
+  'Prensa de piernas': {
+    muscles: 'Cuádriceps, glúteos',
+    technique: [
+      'Pies al ancho de hombros en el centro de la plataforma.',
+      'Bajá hasta que las rodillas queden cerca del pecho sin despegar la cadera.',
+      'Empujá con todo el pie sin bloquear las rodillas arriba.',
+    ],
+    mistake: 'Bajar de más y despegar la cadera del asiento.',
+    substitutes: ['Sentadilla en Smith', 'Extensión de piernas', 'Zancadas con mancuernas'],
+  },
+  'Curl en polea baja': {
+    muscles: 'Bíceps, antebrazos',
+    technique: [
+      'Barra o manija en la polea baja, codos pegados al torso.',
+      'Subí sin mover los codos de lugar y apretá arriba.',
+      'Bajá en 2–3 segundos manteniendo la tensión del cable.',
+    ],
+    mistake: 'Alejarse de la polea y tirar con la espalda.',
+    substitutes: ['Curl con barra', 'Curl alterno'],
+  },
+  'Extensión de tríceps en polea': {
+    muscles: 'Tríceps',
+    technique: [
+      'Polea alta, codos pegados al torso, antebrazos arriba.',
+      'Empujá hacia abajo hasta extender del todo, solo se mueven los antebrazos.',
+      'Volvé controlado hasta que los antebrazos pasen la horizontal.',
+    ],
+    mistake: 'Abrir los codos y empujar con el hombro.',
+    substitutes: ['Fondos en paralelas', 'Extensión tras nuca'],
+  },
+  'Extensión de piernas': {
+    muscles: 'Cuádriceps',
+    technique: [
+      'Ajustá el rodillo sobre los tobillos y el respaldo: rodilla alineada al eje.',
+      'Extendé hasta arriba con 1 seg de pausa.',
+      'Bajá controlado sin que las placas golpeen.',
+    ],
+    mistake: 'Usar impulso y dejar caer el peso.',
+    substitutes: ['Prensa de piernas', 'Sentadilla en Smith'],
+  },
+  'Curl femoral acostado': {
+    muscles: 'Isquiotibiales',
+    technique: [
+      'Rodillo sobre los talones, cadera pegada al banco.',
+      'Llevá los talones a la cola de forma controlada.',
+      'Bajá lento resistiendo el peso.',
+    ],
+    mistake: 'Levantar la cadera del banco al subir.',
+    substitutes: ['Peso muerto rumano en Smith', 'Puente de glúteos'],
+  },
+  'Aperturas en pec deck': {
+    muscles: 'Pectorales',
+    technique: [
+      'Asiento ajustado: manijas a la altura del pecho, codos apenas flexionados.',
+      'Juntá las manijas al frente apretando el pecho 1 seg.',
+      'Abrí controlado hasta sentir el estiramiento, sin ir atrás de más.',
+    ],
+    mistake: 'Abrir demasiado atrás y forzar el hombro.',
+    substitutes: ['Press de pecho en máquina', 'Flexiones'],
+  },
+  Hiperextensiones: {
+    muscles: 'Espalda baja, glúteos, isquiotibiales',
+    technique: [
+      'Ajustá el apoyo a la altura de la cadera en el banco a 45°.',
+      'Bajá con la espalda neutra y subí hasta la línea del cuerpo.',
+      'Apretá glúteos arriba; no hiperextiendas de más.',
+    ],
+    mistake: 'Subir de más arqueando la zona lumbar.',
+    substitutes: ['Peso muerto rumano en Smith', 'Puente de glúteos'],
+  },
+} satisfies Record<string, ExerciseInfo>);
+
 // La rutina de ejemplo usa "Sentadillas": misma ficha que la sentadilla al aire.
 EXERCISE_INFO['Sentadillas'] = EXERCISE_INFO['Sentadilla al aire'];
 
@@ -338,6 +463,16 @@ const ANIM_KEYS: Record<string, string> = {
   'Extensión tras nuca': 'triext',
   'Fondos en silla': 'dips_chair',
   'Plancha (seg)': 'plank',
+  'Sentadilla en Smith': 'smith_squat',
+  'Peso muerto rumano en Smith': 'smith_rdl',
+  'Press de pecho en máquina': 'chest_press',
+  'Press de hombros en máquina': 'shoulder_press',
+  'Remo sentado en polea': 'seated_row',
+  'Prensa de piernas': 'leg_press',
+  'Curl en polea baja': 'cable_curl',
+  'Extensión de tríceps en polea': 'pushdown',
+  'Extensión de piernas': 'leg_ext',
+  'Curl femoral acostado': 'leg_curl',
 };
 
 /** Ficha de un ejercicio, o undefined si es un nombre custom del usuario. */

@@ -9,6 +9,7 @@ import { progressionSuggestions, deloadCheck, type Suggestion } from '../fitness
 import { newPRs, type PR } from '../fitness/records';
 import { getExerciseInfo } from '../fitness/exercises';
 import { warmupFor, stretchFor, type MobilityItem } from '../fitness/warmup';
+import MusicBar from '../components/MusicBar';
 
 const HINT_ICON: Record<Suggestion['kind'], string> = { up: '↑ ', repeat: '↻ ', deload: '↓ ' };
 const HINT_CLASS: Record<Suggestion['kind'], string> = {
@@ -173,6 +174,7 @@ export default function Today() {
             <h1>{active.name}</h1>
           </div>
         </header>
+        <MusicBar />
         <p className="muted small-text">
           Entrar en calor sube el rendimiento y baja el riesgo de lesión. Marcá lo que vayas
           haciendo.

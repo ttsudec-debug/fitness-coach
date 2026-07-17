@@ -67,6 +67,14 @@ export const IconInfo = () => (
   </Icon>
 );
 
+export const IconMusic = () => (
+  <Icon>
+    <path d="M9 18V5l11-2v13" />
+    <circle cx="6" cy="18" r="3" />
+    <circle cx="17" cy="16" r="3" />
+  </Icon>
+);
+
 export const IconFlame = () => (
   <Icon>
     <path d="M12 3c1 3-2.5 4.5-2.5 8a4.5 4.5 0 0 0 9 0c0-2-1-3.5-2-4.5.2 2-.8 3-1.7 3.2C15.5 8 15 5 12 3Z" />

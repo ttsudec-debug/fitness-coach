@@ -14,6 +14,20 @@ type Slot =
   | 'core';
 
 const POOLS: Record<Profile['equipment'], Record<Slot, string>> = {
+  // Máquinas estándar de la cadena Smart Fit: Smith, prensa, poleas y
+  // máquinas selectorizadas — ideal para entrenar sin esperar barras libres.
+  smartfit: {
+    sentadilla: 'Sentadilla en Smith',
+    bisagra: 'Peso muerto rumano en Smith',
+    empuje_h: 'Press de pecho en máquina',
+    empuje_v: 'Press de hombros en máquina',
+    tiron_h: 'Remo sentado en polea',
+    tiron_v: 'Jalón al pecho',
+    unilateral: 'Prensa de piernas',
+    biceps: 'Curl en polea baja',
+    triceps: 'Extensión de tríceps en polea',
+    core: 'Plancha (seg)',
+  },
   gym: {
     sentadilla: 'Sentadilla con barra',
     bisagra: 'Peso muerto rumano',

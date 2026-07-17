@@ -9,7 +9,7 @@ export interface Profile {
   workStart: string; // HH:MM
   workEnd: string;
   trainWhen: 'antes' | 'despues';
-  equipment: 'gym' | 'mancuernas' | 'casa';
+  equipment: 'gym' | 'smartfit' | 'mancuernas' | 'casa';
   injuries: string;
 }
 

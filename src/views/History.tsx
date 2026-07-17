@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, todayStr, getSetting, setSetting, type Workout } from '../db';
+import { db, todayStr, getSetting, setSetting, type Workout, type ProgressPhoto } from '../db';
 import LineChart from '../components/LineChart';
 import { strengthHistory, trackedExercises, personalRecords } from '../fitness/records';
 import type { Profile } from '../fitness/metrics';
@@ -203,6 +203,110 @@ function BodyCard() {
   );
 }
 
+/** Reescala la foto a máx. 1080 px y la comprime a JPEG para no llenar el almacenamiento. */
+async function downscalePhoto(file: File): Promise<Blob> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 1080 / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close();
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error('No se pudo procesar la imagen'))),
+      'image/jpeg',
+      0.85,
+    );
+  });
+}
+
+/** Galería local de fotos de evolución (solo en este dispositivo). */
+function PhotosCard() {
+  const photos = useLiveQuery(() => db.photos.orderBy('date').reverse().toArray(), []);
+  const [urls, setUrls] = useState<Map<number, string>>(new Map());
+  const [viewer, setViewer] = useState<ProgressPhoto | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!photos) return;
+    const map = new Map<number, string>();
+    for (const p of photos) map.set(p.id!, URL.createObjectURL(p.blob));
+    setUrls(map);
+    return () => {
+      for (const u of map.values()) URL.revokeObjectURL(u);
+    };
+  }, [photos]);
+
+  if (!photos) return null;
+
+  async function add(file: File) {
+    setBusy(true);
+    try {
+      const blob = await downscalePhoto(file);
+      await db.photos.add({ date: todayStr(), blob });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="card">
+      <p className="eyebrow">Evolución</p>
+      <h3>Fotos</h3>
+      <p className="muted small-text">
+        Sacate una foto por semana, con la misma luz y pose. Quedan solo en este teléfono.
+      </p>
+      <label className="btn small file-btn">
+        {busy ? 'Procesando…' : '+ Subir foto de hoy'}
+        <input
+          type="file"
+          accept="image/*"
+          hidden
+          disabled={busy}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void add(f);
+            e.target.value = '';
+          }}
+        />
+      </label>
+      {photos.length > 0 && (
+        <div className="photo-grid">
+          {photos.map((p) => (
+            <button key={p.id} className="photo-thumb" onClick={() => setViewer(p)}>
+              <img src={urls.get(p.id!)} alt={`Foto del ${p.date}`} loading="lazy" />
+              <span>{shortDate(p.date)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {viewer && (
+        <div className="photo-viewer" onClick={() => setViewer(null)}>
+          <img src={urls.get(viewer.id!)} alt={`Foto del ${viewer.date}`} />
+          <div className="photo-viewer-bar" onClick={(e) => e.stopPropagation()}>
+            <span>{viewer.date}</span>
+            <button
+              className="btn small danger"
+              onClick={() => {
+                void db.photos.delete(viewer.id!);
+                setViewer(null);
+              }}
+            >
+              Borrar
+            </button>
+            <button className="btn small ghost" onClick={() => setViewer(null)}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 /** Evolución de fuerza (1RM estimada, Epley) por ejercicio + récord actual. */
 function StrengthCard({ workouts }: { workouts: Workout[] }) {
   const tracked = trackedExercises(workouts);
@@ -271,6 +375,7 @@ export default function History() {
       </section>
       <StrengthCard workouts={workouts} />
       <BodyCard />
+      <PhotosCard />
       <section className="card">
         <h3>Entrenamientos</h3>
         {workouts.length === 0 && <p className="muted">Todavía no registraste ninguno.</p>}

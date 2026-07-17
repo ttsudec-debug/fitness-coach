@@ -120,7 +120,8 @@ export default function Plan() {
           <label className="field">
             <span>Equipamiento disponible</span>
             <select value={form.equipment} onChange={(e) => set('equipment', e.target.value as Profile['equipment'])}>
-              <option value="gym">Gimnasio completo</option>
+              <option value="smartfit">Smart Fit (máquinas y poleas)</option>
+              <option value="gym">Gimnasio completo (barras libres)</option>
               <option value="mancuernas">Mancuernas en casa</option>
               <option value="casa">Solo peso corporal</option>
             </select>
