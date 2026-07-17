@@ -132,14 +132,9 @@ export async function seedIfEmpty(): Promise<void> {
     if (seeded) return;
     await db.settings.put({ key: 'seeded', value: '1' });
     await db.routines.add({
-      name: 'Full Body (ejemplo)',
+      name: 'Mi Primera Rutina',
       days: [1, 3, 5], // lun, mié, vie
-      exercises: [
-        { name: 'Sentadillas', sets: 3, reps: 12, weight: 40, restSec: 90 },
-        { name: 'Press banca', sets: 3, reps: 10, weight: 30, restSec: 90 },
-        { name: 'Remo con barra', sets: 3, reps: 10, weight: 30, restSec: 90 },
-        { name: 'Plancha (seg)', sets: 3, reps: 45, weight: 0, restSec: 60 },
-      ],
+      exercises: [],
     });
   });
 }

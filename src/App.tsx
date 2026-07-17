@@ -7,6 +7,7 @@ import Routines from './views/Routines';
 import Nutrition from './views/Nutrition';
 import Coach from './views/Coach';
 import Settings from './views/Settings';
+import { Library } from './views/Library';
 import {
   IconDumbbell,
   IconTarget,
@@ -19,6 +20,7 @@ import {
 
 const TABS = [
   { id: 'hoy', label: 'Hoy', icon: IconDumbbell },
+  { id: 'libreria', label: 'Librería', icon: IconTarget },
   { id: 'plan', label: 'Plan', icon: IconTarget },
   { id: 'comida', label: 'Comida', icon: IconMeal },
   { id: 'historial', label: 'Progreso', icon: IconTrend },
@@ -82,6 +84,7 @@ export default function App() {
       <main className="content">
         <div key={tab} className="tab-pane">
           {tab === 'hoy' && <Today />}
+          {tab === 'libreria' && <Library />}
           {tab === 'plan' && <Plan />}
           {tab === 'comida' && <Nutrition />}
           {tab === 'historial' && <History />}

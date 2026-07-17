@@ -266,14 +266,18 @@ export default function Today() {
         )}
         {logs.map((ex, ei) => (
           <section key={ei} className="card">
-            <div className="ex-head-row">
+            <div 
+              className="ex-head-row" 
+              onClick={() => { if (getExerciseInfo(ex.name)) setSheet(ex.name); }}
+              style={{ cursor: getExerciseInfo(ex.name) ? 'pointer' : 'default' }}
+            >
               <ExerciseAnim name={ex.name} size={64} />
               <h3>{ex.name}</h3>
               {getExerciseInfo(ex.name) && (
                 <button
                   className="icon-btn"
-                  onClick={() => setSheet(ex.name)}
                   aria-label={`Técnica de ${ex.name}`}
+                  style={{ pointerEvents: 'none' }} // El click lo captura el div padre
                 >
                   <IconInfo />
                 </button>

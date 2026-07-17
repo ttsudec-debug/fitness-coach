@@ -76,11 +76,11 @@ export default function Nutrition() {
         const foundFood: Food = {
           name: p.product_name_es || p.product_name || `Producto (${barcode})`,
           cat: p.brands ? `Supermercado (${p.brands})` : 'Escaneado',
-          kcal: nut['energy-kcal_100g'] || 0,
-          protein: nut['proteins_100g'] || 0,
-          carbs: nut['carbohydrates_100g'] || 0,
-          fat: nut['fat_100g'] || 0,
-          custom: true // Lo marcamos custom para que se vea diferente
+          kcal: Math.round(nut['energy-kcal_100g'] || 0),
+          protein: Math.round((nut['proteins_100g'] || 0) * 10) / 10,
+          carbs: Math.round((nut['carbohydrates_100g'] || 0) * 10) / 10,
+          fat: Math.round((nut['fat_100g'] || 0) * 10) / 10,
+          custom: true
         };
         
         setPicking(foundFood);
@@ -111,10 +111,10 @@ export default function Nutrition() {
         const mapped: Food[] = data.products.map((p: any) => ({
           name: p.product_name_es || p.product_name || `Producto`,
           cat: p.brands ? `Global (${p.brands})` : 'Base Mundial',
-          kcal: p.nutriments?.['energy-kcal_100g'] || 0,
-          protein: p.nutriments?.['proteins_100g'] || 0,
-          carbs: p.nutriments?.['carbohydrates_100g'] || 0,
-          fat: p.nutriments?.['fat_100g'] || 0,
+          kcal: Math.round(p.nutriments?.['energy-kcal_100g'] || 0),
+          protein: Math.round((p.nutriments?.['proteins_100g'] || 0) * 10) / 10,
+          carbs: Math.round((p.nutriments?.['carbohydrates_100g'] || 0) * 10) / 10,
+          fat: Math.round((p.nutriments?.['fat_100g'] || 0) * 10) / 10,
           custom: true
         })).filter((p: Food) => p.name !== 'Producto' && p.kcal > 0);
         
