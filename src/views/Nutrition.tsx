@@ -150,8 +150,6 @@ export default function Nutrition() {
       : null;
 
   const total = sumMacros(meals);
-  const results = searchFoods(query, customFoods);
-
   async function addEntry() {
     if (!picking) return;
     const g = Number(grams.replace(',', '.'));
