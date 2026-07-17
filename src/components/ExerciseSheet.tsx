@@ -1,4 +1,5 @@
 import { getExerciseInfo } from '../fitness/exercises';
+import ExerciseAnim from './ExerciseAnim';
 
 /** Ficha de técnica de un ejercicio, como bottom-sheet.
  * Si se pasa onSubstitute, cada sustituto ofrece un botón "Usar". */
@@ -23,16 +24,16 @@ export default function ExerciseSheet({
             ✕
           </button>
         </div>
-        <p className="muted small-text">💪 {info.muscles}</p>
+        <ExerciseAnim name={name} size={190} big />
+        <p className="muted small-text">{info.muscles}</p>
         <h4>Técnica</h4>
         <ul className="sheet-list">
           {info.technique.map((t, i) => (
             <li key={i}>{t}</li>
           ))}
         </ul>
-        <p className="small-text">
-          <strong>⚠️ Error común:</strong> {info.mistake}
-        </p>
+        <h4>Error común</h4>
+        <p className="small-text">{info.mistake}</p>
         {info.substitutes.length > 0 && (
           <>
             <h4>Sustituciones</h4>

@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, DAY_NAMES, type Routine } from '../db';
 import ExerciseSheet from '../components/ExerciseSheet';
 import { getExerciseInfo } from '../fitness/exercises';
+import { IconInfo } from '../components/icons';
 
 const EMPTY: Routine = {
   name: '',
@@ -90,7 +91,7 @@ export default function Routines() {
                   onClick={() => setSheet(i)}
                   aria-label={`Técnica de ${ex.name}`}
                 >
-                  ℹ️
+                  <IconInfo />
                 </button>
               )}
             </div>

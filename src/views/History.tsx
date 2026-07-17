@@ -158,7 +158,8 @@ function BodyCard() {
 
   return (
     <section className="card">
-      <h3>⚖️ Peso corporal</h3>
+      <p className="eyebrow">Tendencia</p>
+      <h3>Peso corporal</h3>
       <div className="ex-nums two">
         <label>
           <input
@@ -216,7 +217,8 @@ function StrengthCard({ workouts }: { workouts: Workout[] }) {
 
   return (
     <section className="card">
-      <h3>🏆 Fuerza por ejercicio</h3>
+      <p className="eyebrow">Récords</p>
+      <h3>Fuerza por ejercicio</h3>
       <label className="field">
         <span>Ejercicio (1RM estimada)</span>
         <select value={name} onChange={(e) => setSel(e.target.value)}>
@@ -248,7 +250,10 @@ export default function History() {
   return (
     <div className="view">
       <header className="view-head">
-        <h1>Progreso</h1>
+        <div>
+          <p className="eyebrow">Tu semana</p>
+          <h1>Progreso</h1>
+        </div>
       </header>
       <div className="stat-row">
         <div className="stat-tile">
@@ -292,7 +297,7 @@ export default function History() {
                 onClick={() => void db.workouts.delete(w.id!)}
                 aria-label="Borrar"
               >
-                🗑
+                ✕
               </button>
             </div>
           );

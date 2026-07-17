@@ -13,8 +13,8 @@ export default defineConfig({
         short_name: 'FitCoach',
         description: 'Asesor personal de rutinas de ejercicio',
         lang: 'es',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        theme_color: '#121417',
+        background_color: '#121417',
         display: 'standalone',
         orientation: 'portrait',
         icons: [

@@ -209,7 +209,8 @@ export default function Plan() {
         </button>
       </section>
       <section className="card">
-        <h3>🥗 Consejo de hoy</h3>
+        <p className="eyebrow">Nutrición</p>
+        <h3>Consejo de hoy</h3>
         <p>{todaysFoodTip()}</p>
         <p className="muted small-text">
           Guía diaria: {t.proteinG} g proteína · ~{t.kcal.toLocaleString('es')} kcal ·{' '}

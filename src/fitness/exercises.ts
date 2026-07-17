@@ -3,6 +3,7 @@ export interface ExerciseInfo {
   technique: string[];
   mistake: string;
   substitutes: string[];
+  anim?: string; // clave del pictograma animado en fitness/anims.ts
 }
 
 /** Fichas de los ejercicios de las plantillas (gym / mancuernas / casa). */
@@ -307,7 +308,42 @@ export const EXERCISE_INFO: Record<string, ExerciseInfo> = {
 // La rutina de ejemplo usa "Sentadillas": misma ficha que la sentadilla al aire.
 EXERCISE_INFO['Sentadillas'] = EXERCISE_INFO['Sentadilla al aire'];
 
+const ANIM_KEYS: Record<string, string> = {
+  'Sentadilla con barra': 'squat_bar',
+  'Sentadilla goblet': 'squat_gob',
+  'Sentadilla al aire': 'squat_bw',
+  Sentadillas: 'squat_bw',
+  'Peso muerto rumano': 'hinge_bar',
+  'Peso muerto rumano c/ mancuernas': 'hinge_db',
+  'Puente de glúteos': 'bridge',
+  'Press banca': 'bench_bar',
+  'Press banca c/ mancuernas': 'bench_db',
+  Flexiones: 'pushup',
+  'Press militar': 'ohp_bar',
+  'Press militar c/ mancuernas': 'ohp_db',
+  'Flexiones pica': 'pike',
+  'Remo con barra': 'row_bar',
+  'Remo a un brazo': 'row_db',
+  'Remo invertido (mesa)': 'row_inv',
+  'Jalón al pecho': 'pulldown',
+  'Pull-over c/ mancuerna': 'pullover',
+  'Dominadas (o negativas)': 'pullup',
+  'Zancadas con mancuernas': 'lunge',
+  'Zancadas c/ mancuernas': 'lunge',
+  'Sentadilla búlgara': 'bulgarian',
+  'Curl con barra': 'curl_bar',
+  'Curl alterno': 'curl_db',
+  'Curl con mochila': 'curl_pack',
+  'Fondos en paralelas': 'dips',
+  'Extensión tras nuca': 'triext',
+  'Fondos en silla': 'dips_chair',
+  'Plancha (seg)': 'plank',
+};
+
 /** Ficha de un ejercicio, o undefined si es un nombre custom del usuario. */
 export function getExerciseInfo(name: string): ExerciseInfo | undefined {
-  return EXERCISE_INFO[name.trim()];
+  const clean = name.trim();
+  const info = EXERCISE_INFO[clean];
+  if (!info) return undefined;
+  return { ...info, anim: ANIM_KEYS[clean] };
 }
