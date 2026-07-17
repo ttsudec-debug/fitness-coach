@@ -1,6 +1,6 @@
 import { getExerciseInfo } from '../fitness/exercises';
 import ExerciseMedia from './ExerciseMedia';
-import MuscleMap from './MuscleMap';
+import { BodyMap } from './BodyMap';
 
 /** Ficha de técnica de un ejercicio, como bottom-sheet.
  * Si se pasa onSubstitute, cada sustituto ofrece un botón "Usar". */
@@ -29,17 +29,12 @@ export default function ExerciseSheet({
         {info.mg && (
           <>
             <h4>Músculos trabajados</h4>
-            <div className="mm-legend">
-              <span>
-                <i className="mm-dot primary" />
-                Principal
-              </span>
-              <span>
-                <i className="mm-dot secondary" />
-                Secundario
-              </span>
+            <div style={{ background: '#000', padding: '10px 0', borderRadius: '8px', marginBottom: '15px' }}>
+              <BodyMap 
+                readonly 
+                activeRegions={[...info.mg.primary, ...info.mg.secondary]} 
+              />
             </div>
-            <MuscleMap groups={info.mg} />
           </>
         )}
         <p className="muted small-text">{info.muscles}</p>

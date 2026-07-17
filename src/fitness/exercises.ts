@@ -438,20 +438,91 @@ Object.assign(EXERCISE_INFO, {
     technique: [
       'Asiento ajustado: manijas a la altura del pecho, codos apenas flexionados.',
       'Juntá las manijas al frente apretando el pecho 1 seg.',
-      'Abrí controlado hasta sentir el estiramiento, sin ir atrás de más.',
     ],
     mistake: 'Abrir demasiado atrás y forzar el hombro.',
     substitutes: ['Press de pecho en máquina', 'Flexiones'],
   },
-  Hiperextensiones: {
+  'Hiperextensiones': {
     muscles: 'Espalda baja, glúteos, isquiotibiales',
     technique: [
-      'Ajustá el apoyo a la altura de la cadera en el banco a 45°.',
-      'Bajá con la espalda neutra y subí hasta la línea del cuerpo.',
-      'Apretá glúteos arriba; no hiperextiendas de más.',
+      'Ajustá el cojín justo debajo de la cadera (huesos pélvicos libres).',
+      'Cruzá los brazos y bajá el torso controlado.',
+      'Subí apretando glúteos y lumbares, sin hiperextender el cuello hacia atrás.',
     ],
-    mistake: 'Subir de más arqueando la zona lumbar.',
-    substitutes: ['Peso muerto rumano en Smith', 'Puente de glúteos'],
+    mistake: 'Usar impulso y encorvar la espalda al subir.',
+    substitutes: ['Peso muerto rumano', 'Superman (piso)'],
+  },
+  
+  // ---------- Smartfit / Máquinas (Nuevos) ----------
+  'Remo en máquina': {
+    muscles: 'Dorsales, romboides, bíceps',
+    technique: [
+      'Ajustá el asiento para que el pecho quede bien apoyado en el cojín.',
+      'Tirá de los agarres llevando los codos hacia atrás y juntando las escápulas.',
+      'Mantené el pecho pegado al cojín durante todo el movimiento.',
+    ],
+    mistake: 'Despegar el pecho para tirar con el impulso del cuerpo.',
+    substitutes: ['Remo sentado en polea', 'Remo con barra'],
+  },
+  'Máquina de Abductores': {
+    muscles: 'Glúteo medio, abductores (zona externa)',
+    technique: [
+      'Sentate con la espalda recta y apoyada.',
+      'Empujá las almohadillas hacia afuera controlando el movimiento.',
+      'Volvé lento sin dejar que las placas se toquen.',
+    ],
+    mistake: 'Hacer el ejercicio muy rápido y rebotar.',
+    substitutes: ['Caminata lateral con banda'],
+  },
+  'Máquina de Aductores': {
+    muscles: 'Aductores (zona interna del muslo)',
+    technique: [
+      'Sentate con la espalda recta y las almohadillas por dentro de las rodillas.',
+      'Juntá las piernas apretando el centro y sostén 1 segundo.',
+      'Abrí controlado hasta sentir estiramiento.',
+    ],
+    mistake: 'Usar mucho peso y hacer un rango de movimiento muy corto.',
+    substitutes: ['Sentadilla sumo'],
+  },
+  'Curl de bíceps en máquina (Predicador)': {
+    muscles: 'Bíceps, braquial',
+    technique: [
+      'Ajustá el asiento para que las axilas queden justas en el borde del cojín.',
+      'Estirá los brazos casi por completo, pero sin trabar los codos.',
+      'Tirá del agarre hacia los hombros apretando el bíceps arriba.',
+    ],
+    mistake: 'Levantar los codos del cojín al subir el peso.',
+    substitutes: ['Curl con barra', 'Curl alterno'],
+  },
+  'Polea cruzada (Cruce de poleas)': {
+    muscles: 'Pectorales, deltoides frontal',
+    technique: [
+      'Colocá las poleas a la altura de los hombros o más altas.',
+      'Da un paso adelante, flexioná apenas los codos y juntá las manos al frente.',
+      'Siente cómo se estira el pecho al abrir y contrae al cerrar.',
+    ],
+    mistake: 'Empujar en vez de abrazar (convertirlo en un press).',
+    substitutes: ['Aperturas en pec deck'],
+  },
+  'Elevación de gemelos en máquina': {
+    muscles: 'Gemelos (Pantorrillas)',
+    technique: [
+      'Colocá la punta de los pies en el borde y los hombros bajo los cojines.',
+      'Bajá los talones hasta sentir que estira toda la pantorrilla.',
+      'Empujá lo más arriba posible y sostén medio segundo.',
+    ],
+    mistake: 'Rebotar abajo sin aprovechar el estiramiento completo.',
+    substitutes: ['Elevación de gemelos de pie'],
+  },
+  'Fly inverso en máquina': {
+    muscles: 'Hombro posterior, trapecio, romboides',
+    technique: [
+      'Sentate mirando hacia la máquina, pecho apoyado.',
+      'Tomá los agarres con brazos levemente flexionados.',
+      'Abrí los brazos hacia atrás apretando la espalda alta.',
+    ],
+    mistake: 'Doblar demasiado los codos (usar los tríceps en vez del hombro).',
+    substitutes: ['Pájaros con mancuernas'],
   },
 } satisfies Record<string, ExerciseInfo>);
 
@@ -529,6 +600,13 @@ function muscleGroupsForAnim(anim: string | undefined): MuscleGroups | undefined
 const EXPLICIT_MG: Record<string, MuscleGroups> = {
   'Aperturas en pec deck': { primary: ['pecho'], secondary: ['hombros'] },
   Hiperextensiones: { primary: ['lumbar', 'gluteos'], secondary: ['isquios'] },
+  'Remo en máquina': { primary: ['dorsal', 'espalda_alta'], secondary: ['biceps'] },
+  'Máquina de Abductores': { primary: ['gluteos'], secondary: [] },
+  'Máquina de Aductores': { primary: ['aductores'], secondary: [] },
+  'Curl de bíceps en máquina (Predicador)': { primary: ['biceps'], secondary: ['antebrazo'] },
+  'Polea cruzada (Cruce de poleas)': { primary: ['pecho'], secondary: ['hombros'] },
+  'Elevación de gemelos en máquina': { primary: ['gemelos'], secondary: [] },
+  'Fly inverso en máquina': { primary: ['hombros', 'espalda_alta'], secondary: ['trapecio'] },
 };
 
 /** Ficha de un ejercicio, o undefined si es un nombre custom del usuario. */

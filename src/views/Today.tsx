@@ -148,12 +148,23 @@ export default function Today() {
 
   async function finish() {
     if (!active) return;
-    const records = await newPRs(logs, todayStr());
+    
+    // Auto-marcar como "done" las series que tengan repeticiones válidas (>0)
+    // para evitar el problema de "0 kg y 0 series" si el usuario olvidó marcarlas.
+    const finalLogs = logs.map(ex => ({
+      ...ex,
+      sets: ex.sets.map(s => ({
+        ...s,
+        done: s.done || (s.reps > 0)
+      }))
+    }));
+
+    const records = await newPRs(finalLogs, todayStr());
     await db.workouts.add({
       date: todayStr(),
       routineId: active.id!,
       routineName: active.name,
-      exercises: logs,
+      exercises: finalLogs,
       startedAt,
       finishedAt: Date.now(),
     });
