@@ -1,5 +1,5 @@
 import { getExerciseInfo } from '../fitness/exercises';
-import ExerciseAnim from './ExerciseAnim';
+import ExerciseMedia from './ExerciseMedia';
 import MuscleMap from './MuscleMap';
 
 /** Ficha de técnica de un ejercicio, como bottom-sheet.
@@ -25,7 +25,7 @@ export default function ExerciseSheet({
             ✕
           </button>
         </div>
-        <ExerciseAnim name={name} size={190} big />
+        <ExerciseMedia name={name} size={190} big />
         {info.mg && (
           <>
             <h4>Músculos trabajados</h4>

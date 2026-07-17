@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, todayStr, DAY_NAMES, type Routine, type ExerciseLog } from '../db';
 import RestTimer from '../components/RestTimer';
 import ExerciseSheet from '../components/ExerciseSheet';
-import ExerciseAnim from '../components/ExerciseAnim';
+import ExerciseMedia from '../components/ExerciseMedia';
 import { IconInfo } from '../components/icons';
 import { progressionSuggestions, deloadCheck, type Suggestion } from '../fitness/progression';
 import { newPRs, type PR } from '../fitness/records';
@@ -271,7 +271,7 @@ export default function Today() {
               onClick={() => { if (getExerciseInfo(ex.name)) setSheet(ex.name); }}
               style={{ cursor: getExerciseInfo(ex.name) ? 'pointer' : 'default' }}
             >
-              <ExerciseAnim name={ex.name} size={64} />
+              <ExerciseMedia name={ex.name} size={64} />
               <h3>{ex.name}</h3>
               {getExerciseInfo(ex.name) && (
                 <button

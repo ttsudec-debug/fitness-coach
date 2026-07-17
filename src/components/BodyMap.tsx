@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Body from 'react-muscle-highlighter';
 
 interface Props {
   onSelectMuscle?: (muscle: string) => void;
@@ -7,25 +8,64 @@ interface Props {
   readonly?: boolean;
 }
 
+const SLUG_MAP: Record<string, string> = {
+  'Pectorales': 'chest',
+  'Hombros': 'deltoids',
+  'Bíceps': 'biceps',
+  'Tríceps': 'triceps',
+  'Abdominales': 'abs',
+  'Piernas': 'quadriceps', // Simplification for the old map compatibility
+  'Espalda': 'upper-back',
+  'Glúteos': 'gluteal',
+  
+  // Also support the exact DB keys
+  'pecho': 'chest',
+  'hombros': 'deltoids',
+  'biceps': 'biceps',
+  'triceps': 'triceps',
+  'antebrazo': 'forearm',
+  'abdomen': 'abs',
+  'oblicuos': 'obliques',
+  'trapecio': 'trapezius',
+  'dorsal': 'upper-back',
+  'espalda_alta': 'upper-back',
+  'lumbar': 'lower-back',
+  'gluteos': 'gluteal',
+  'cuadriceps': 'quadriceps',
+  'isquios': 'hamstring',
+  'gemelos': 'calves',
+  'aductores': 'adductors'
+};
+
+const REVERSE_MAP: Record<string, string> = Object.entries(SLUG_MAP).reduce((acc, [k, v]) => {
+  // Solo guardamos el primero que encontramos (el español legible principal)
+  if (!acc[v]) acc[v] = k;
+  return acc;
+}, {} as Record<string, string>);
+
 export function BodyMap({ onSelectMuscle, selectedMuscle, activeRegions = [], readonly = false }: Props) {
   const [view, setView] = useState<'front' | 'back'>('front');
 
-  // Colores para los SVG
-  const baseColor = 'var(--surface-3)';
-  const activeColor = 'var(--accent)'; // Naranja Strava
-  
-  function fillFor(muscle: string) {
-    if (activeRegions.includes(muscle)) return activeColor;
-    return selectedMuscle === muscle ? activeColor : baseColor;
-  }
+  const activeColor = '#FF5216'; // Naranja Strava vibrante
 
-  function handleSelect(muscle: string) {
-    if (!readonly && onSelectMuscle) {
-      onSelectMuscle(muscle);
+  // Construir data array para react-muscle-highlighter
+  const data = [];
+  
+  // 1. Regiones activas del heatmap (entrenamientos)
+  for (const region of activeRegions) {
+    const slug = SLUG_MAP[region];
+    if (slug) {
+      data.push({ slug: slug as any, color: activeColor });
     }
   }
 
-  const cursorStyle = readonly ? 'default' : 'pointer';
+  // 2. Músculo seleccionado en la librería
+  if (selectedMuscle) {
+    const slug = SLUG_MAP[selectedMuscle];
+    if (slug) {
+      data.push({ slug: slug as any, color: activeColor });
+    }
+  }
 
   return (
     <div className="body-map-container" style={{ textAlign: 'center', margin: readonly ? '0' : '20px 0' }}>
@@ -47,127 +87,24 @@ export function BodyMap({ onSelectMuscle, selectedMuscle, activeRegions = [], re
       )}
 
       <div className="svg-wrapper" style={{ display: 'inline-block', position: 'relative' }}>
-        {view === 'front' ? (
-          <svg width="200" height="400" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
-            {/* Cabeza (no clickeable) */}
-            <circle cx="100" cy="40" r="25" fill="#444" />
-            
-            {/* Hombros */}
-            <path 
-              d="M 60 70 L 40 100 L 55 120 L 70 80 Z" 
-              fill={fillFor('Hombros')} 
-              onClick={() => handleSelect('Hombros')}
-              style={{ cursor: cursorStyle }}
-            />
-            <path 
-              d="M 140 70 L 160 100 L 145 120 L 130 80 Z" 
-              fill={fillFor('Hombros')} 
-              onClick={() => handleSelect('Hombros')}
-              style={{ cursor: cursorStyle }}
-            />
-
-            {/* Pectorales */}
-            <path 
-              d="M 75 75 L 125 75 L 125 110 C 110 120, 90 120, 75 110 Z" 
-              fill={fillFor('Pectorales')} 
-              onClick={() => handleSelect('Pectorales')}
-              style={{ cursor: cursorStyle }}
-            />
-
-            {/* Bíceps */}
-            <path 
-              d="M 45 125 L 35 180 L 50 185 L 60 130 Z" 
-              fill={fillFor('Bíceps')} 
-              onClick={() => handleSelect('Bíceps')}
-              style={{ cursor: cursorStyle }}
-            />
-            <path 
-              d="M 155 125 L 165 180 L 150 185 L 140 130 Z" 
-              fill={fillFor('Bíceps')} 
-              onClick={() => handleSelect('Bíceps')}
-              style={{ cursor: cursorStyle }}
-            />
-
-            {/* Abdominales */}
-            <rect 
-              x="80" y="120" width="40" height="70" rx="5" 
-              fill={fillFor('Abdominales')} 
-              onClick={() => handleSelect('Abdominales')}
-              style={{ cursor: cursorStyle }}
-            />
-
-            {/* Piernas (Cuádriceps) */}
-            <path 
-              d="M 75 200 L 95 200 L 95 290 L 70 290 Z" 
-              fill={fillFor('Piernas')} 
-              onClick={() => handleSelect('Piernas')}
-              style={{ cursor: cursorStyle }}
-            />
-            <path 
-              d="M 105 200 L 125 200 L 130 290 L 105 290 Z" 
-              fill={fillFor('Piernas')} 
-              onClick={() => handleSelect('Piernas')}
-              style={{ cursor: cursorStyle }}
-            />
-            
-            {/* Pantorrillas (simplificado) */}
-            <path d="M 75 300 L 90 300 L 85 370 L 75 370 Z" fill="#444" />
-            <path d="M 110 300 L 125 300 L 125 370 L 115 370 Z" fill="#444" />
-          </svg>
-        ) : (
-          <svg width="200" height="400" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
-            {/* Cabeza */}
-            <circle cx="100" cy="40" r="25" fill="#444" />
-
-            {/* Espalda (Dorsales y trapecios) */}
-            <path 
-              d="M 70 70 L 130 70 L 120 160 L 80 160 Z" 
-              fill={fillFor('Espalda')} 
-              onClick={() => handleSelect('Espalda')}
-              style={{ cursor: cursorStyle }}
-            />
-
-            {/* Tríceps */}
-            <path 
-              d="M 45 125 L 35 180 L 50 185 L 60 130 Z" 
-              fill={fillFor('Tríceps')} 
-              onClick={() => handleSelect('Tríceps')}
-              style={{ cursor: cursorStyle }}
-            />
-            <path 
-              d="M 155 125 L 165 180 L 150 185 L 140 130 Z" 
-              fill={fillFor('Tríceps')} 
-              onClick={() => handleSelect('Tríceps')}
-              style={{ cursor: cursorStyle }}
-            />
-
-            {/* Glúteos */}
-            <path 
-              d="M 70 165 L 130 165 L 135 200 L 65 200 Z" 
-              fill={fillFor('Glúteos')} 
-              onClick={() => handleSelect('Glúteos')}
-              style={{ cursor: cursorStyle }}
-            />
-
-            {/* Piernas (Isquios) */}
-            <path 
-              d="M 75 205 L 95 205 L 95 290 L 70 290 Z" 
-              fill={fillFor('Piernas')} 
-              onClick={() => handleSelect('Piernas')}
-              style={{ cursor: cursorStyle }}
-            />
-            <path 
-              d="M 105 205 L 125 205 L 130 290 L 105 290 Z" 
-              fill={fillFor('Piernas')} 
-              onClick={() => handleSelect('Piernas')}
-              style={{ cursor: cursorStyle }}
-            />
-          </svg>
-        )}
+        <Body
+          data={data}
+          side={view}
+          scale={readonly ? 1 : 1.3}
+          defaultFill="var(--surface-3)"
+          defaultStroke="#000"
+          defaultStrokeWidth={1}
+          onBodyPartPress={(part) => {
+            if (!readonly && onSelectMuscle) {
+              const spanishName = REVERSE_MAP[part.slug || ''];
+              if (spanishName) onSelectMuscle(spanishName);
+            }
+          }}
+        />
       </div>
       
       {!readonly && (
-        <p className="muted small-text" style={{ marginTop: '10px' }}>
+        <p className="muted small-text" style={{ marginTop: '30px' }}>
           Toca un grupo muscular para ver ejercicios.
         </p>
       )}
