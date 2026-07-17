@@ -36,29 +36,45 @@ export default function App() {
     void seedIfEmpty();
   }, []);
 
-  // Recordatorio diario (best-effort: funciona mientras la app esté abierta).
+  // Recordatorio diario (ahora persistente nativo con Capacitor)
   useEffect(() => {
-    let timer: number | undefined;
-    let cancelled = false;
     async function schedule() {
       const enabled = await getSetting('reminderEnabled');
       const time = await getSetting('reminderTime');
-      if (cancelled || enabled !== '1' || !time) return;
-      if (!('Notification' in window) || Notification.permission !== 'granted') return;
-      const [h, m] = time.split(':').map(Number);
-      const now = new Date();
-      const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
-      if (next <= now) next.setDate(next.getDate() + 1);
-      timer = window.setTimeout(() => {
-        new Notification('Fitness Coach', { body: '💪 Hora de entrenar. ¡Tu rutina te espera!' });
-        void schedule();
-      }, next.getTime() - now.getTime());
+
+      try {
+        // Cancelar notificaciones previas
+        await import('@capacitor/local-notifications').then(async ({ LocalNotifications }) => {
+          await LocalNotifications.cancel({ notifications: [{ id: 1 }] });
+
+          if (enabled !== '1' || !time) return;
+
+          const perm = await LocalNotifications.checkPermissions();
+          if (perm.display !== 'granted') {
+            const req = await LocalNotifications.requestPermissions();
+            if (req.display !== 'granted') return;
+          }
+
+          const [h, m] = time.split(':').map(Number);
+          await LocalNotifications.schedule({
+            notifications: [
+              {
+                title: 'Fitness Coach',
+                body: '💪 Hora de entrenar. ¡Tu rutina te espera!',
+                id: 1,
+                schedule: {
+                  on: { hour: h, minute: m },
+                  allowWhileIdle: true,
+                },
+              },
+            ],
+          });
+        });
+      } catch (e) {
+        console.warn('LocalNotifications no disponible (entorno web puro)', e);
+      }
     }
     void schedule();
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
   }, [tab]);
 
   return (

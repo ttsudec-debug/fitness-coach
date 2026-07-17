@@ -52,15 +52,28 @@ export default function Settings() {
 
   async function toggleReminder(on: boolean) {
     if (on) {
-      if (!('Notification' in window)) {
-        flash('Este navegador no soporta notificaciones');
-        return;
-      }
-      if (Notification.permission !== 'granted') {
-        const p = await Notification.requestPermission();
-        if (p !== 'granted') {
-          flash('Permiso de notificaciones denegado');
+      try {
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
+        const perm = await LocalNotifications.checkPermissions();
+        if (perm.display !== 'granted') {
+          const req = await LocalNotifications.requestPermissions();
+          if (req.display !== 'granted') {
+            flash('Permiso de notificaciones denegado en Android');
+            return;
+          }
+        }
+      } catch (e) {
+        // Fallback web
+        if (!('Notification' in window)) {
+          flash('Este navegador no soporta notificaciones');
           return;
+        }
+        if (Notification.permission !== 'granted') {
+          const p = await Notification.requestPermission();
+          if (p !== 'granted') {
+            flash('Permiso de notificaciones denegado');
+            return;
+          }
         }
       }
     }

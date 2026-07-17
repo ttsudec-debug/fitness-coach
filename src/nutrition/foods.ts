@@ -93,6 +93,43 @@ export const FOOD_DB: Food[] = [
   { name: 'Leche de almendras s/azúcar', cat: 'Bebidas', kcal: 15, protein: 0.6, carbs: 0.6, fat: 1.2 },
   { name: 'Café negro', cat: 'Bebidas', kcal: 1, protein: 0.1, carbs: 0, fat: 0 },
   { name: 'Cerveza', cat: 'Bebidas', kcal: 43, protein: 0.5, carbs: 3.6, fat: 0 },
+
+  // --- PRODUCTOS CHILENOS Y SUPERMERCADOS ---
+  // Panes
+  { name: 'Marraqueta (1 unidad)', cat: 'Cereales', kcal: 260, protein: 8, carbs: 54, fat: 1 },
+  { name: 'Hallulla (1 unidad)', cat: 'Cereales', kcal: 320, protein: 9, carbs: 56, fat: 6 },
+  { name: 'Pan de Molde Blanco Líder', cat: 'Cereales', kcal: 247, protein: 8.5, carbs: 50, fat: 1.5 },
+  { name: 'Pan de Molde Integral Castaño', cat: 'Cereales', kcal: 236, protein: 12.3, carbs: 41.5, fat: 3 },
+  { name: 'Pan Pita Ideal', cat: 'Cereales', kcal: 250, protein: 9.3, carbs: 49.6, fat: 1.2 },
+
+  // Lácteos Colun / Soprole / Lider
+  { name: 'Leche Descremada Colun', cat: 'Lácteos', kcal: 34, protein: 3.2, carbs: 4.8, fat: 0.1 },
+  { name: 'Yogur Protein Plus Soprole', cat: 'Lácteos', kcal: 50, protein: 10, carbs: 4, fat: 0 },
+  { name: 'Yogur Batido Líder', cat: 'Lácteos', kcal: 82, protein: 3.1, carbs: 14, fat: 1.4 },
+  { name: 'Queso Gouda Laminado Líder', cat: 'Lácteos', kcal: 334, protein: 24, carbs: 1.5, fat: 26 },
+  { name: 'Quesillo Soprole', cat: 'Lácteos', kcal: 110, protein: 12, carbs: 3.5, fat: 5 },
+
+  // Carnes, Pescados y Legumbres en conserva
+  { name: 'Atún al agua Cuisine & Co', cat: 'Proteínas', kcal: 98, protein: 22, carbs: 0, fat: 1 },
+  { name: 'Atún en aceite Líder', cat: 'Proteínas', kcal: 160, protein: 24, carbs: 0, fat: 7 },
+  { name: 'Pollo Pechuga deshuesada Super Pollo', cat: 'Proteínas', kcal: 110, protein: 23, carbs: 0, fat: 1.5 },
+  { name: 'Jurel San José', cat: 'Proteínas', kcal: 140, protein: 22, carbs: 0, fat: 5.5 },
+  { name: 'Lentejas listas Cuisine & Co', cat: 'Legumbres', kcal: 90, protein: 6, carbs: 14, fat: 0.5 },
+
+  // Típicos Chilenos (Por 100g aprox)
+  { name: 'Empanada de Pino (horno)', cat: 'Típico', kcal: 250, protein: 8, carbs: 30, fat: 11 },
+  { name: 'Pastel de Choclo', cat: 'Típico', kcal: 135, protein: 5.5, carbs: 18, fat: 4.5 },
+  { name: 'Humita', cat: 'Típico', kcal: 180, protein: 4, carbs: 25, fat: 7 },
+  { name: 'Sopaipilla frita', cat: 'Típico', kcal: 350, protein: 4, carbs: 45, fat: 16 },
+  { name: 'Cazuela de vacuno (líquido y sólido)', cat: 'Típico', kcal: 70, protein: 4, carbs: 7, fat: 2.5 },
+  { name: 'Porotos con riendas', cat: 'Típico', kcal: 145, protein: 7, carbs: 24, fat: 2 },
+
+  // Extras y Snacks
+  { name: 'Galletas Tritón', cat: 'Snacks', kcal: 470, protein: 4.6, carbs: 68, fat: 20 },
+  { name: 'Super Ocho', cat: 'Snacks', kcal: 504, protein: 6, carbs: 64, fat: 25 },
+  { name: 'Papas fritas Lays', cat: 'Snacks', kcal: 536, protein: 6.5, carbs: 53, fat: 34 },
+  { name: 'Bebida Pap', cat: 'Bebidas', kcal: 42, protein: 0, carbs: 11, fat: 0 },
+  { name: 'Agua Cachantun', cat: 'Bebidas', kcal: 0, protein: 0, carbs: 0, fat: 0 },
 ];
 
 function norm(s: string): string {
