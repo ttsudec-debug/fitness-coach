@@ -56,7 +56,7 @@ export default function CloudSync({ flash }: { flash: (msg: string) => void }) {
           carbs: c.carbs,
           fat: c.fat
         }));
-        await supabase.from('custom_foods').upsert(customToPush, { onConflict: 'name, user_id' }).ignore();
+        await supabase.from('custom_foods').upsert(customToPush, { onConflict: 'name, user_id', ignoreDuplicates: true });
       }
 
       // 2. Subir registro de consumo diario
@@ -73,7 +73,7 @@ export default function CloudSync({ flash }: { flash: (msg: string) => void }) {
           carbs: m.carbs,
           fat: m.fat
         }));
-        await supabase.from('meals').upsert(mealsToPush, { onConflict: 'date, meal, name, user_id' }).ignore();
+        await supabase.from('meals').upsert(mealsToPush, { onConflict: 'date, meal, name, user_id', ignoreDuplicates: true });
       }
       
       flash('Datos sincronizados en la nube ✓');
