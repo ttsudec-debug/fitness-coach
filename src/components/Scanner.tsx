@@ -20,6 +20,7 @@ export default function Scanner({ onResult, onCancel }: ScannerProps) {
           return;
         }
 
+        document.documentElement.classList.add('barcode-scanner-active');
         document.body.classList.add('barcode-scanner-active');
         
         // Instalar el módulo de Google Play Services si no existe (solo Android)
@@ -51,6 +52,7 @@ export default function Scanner({ onResult, onCancel }: ScannerProps) {
     void start();
 
     async function stop() {
+      document.documentElement.classList.remove('barcode-scanner-active');
       document.body.classList.remove('barcode-scanner-active');
       await BarcodeScanner.removeAllListeners();
       await BarcodeScanner.stopScan().catch(() => {});

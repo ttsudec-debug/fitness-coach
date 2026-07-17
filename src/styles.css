@@ -1269,6 +1269,7 @@ input[type='checkbox'] {
 }
 
 /* ---------- Lector de Códigos de Barras ---------- */
+html.barcode-scanner-active,
 body.barcode-scanner-active {
   background: transparent !important;
 }
