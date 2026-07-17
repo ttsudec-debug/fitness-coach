@@ -344,8 +344,86 @@ function StrengthCard({ workouts }: { workouts: Workout[] }) {
   );
 }
 
+import { BodyMap } from '../components/BodyMap';
+import { getExerciseInfo } from '../fitness/exercises';
+
+function getWorkoutMuscles(w: Workout): string[] {
+  const muscles = new Set<string>();
+  w.exercises.forEach(ex => {
+    const info = getExerciseInfo(ex.name);
+    if (info?.mg) {
+      info.mg.primary.forEach(m => muscles.add(m));
+      // Optionally secondary as well, but primary is better for a heatmap
+      // info.mg.secondary.forEach(m => muscles.add(m));
+    }
+  });
+  // Capitalize keys to match BodyMap (e.g. 'pecho' -> 'Pectorales', etc.)
+  // Wait, BodyMap uses specific names!
+  const map: Record<string, string> = {
+    'pecho': 'Pectorales',
+    'hombros': 'Hombros',
+    'biceps': 'Bíceps',
+    'triceps': 'Tríceps',
+    'abdomen': 'Abdominales',
+    'oblicuos': 'Abdominales',
+    'piernas': 'Piernas', // Fallback
+    'cuadriceps': 'Piernas',
+    'isquios': 'Piernas',
+    'gemelos': 'Piernas',
+    'aductores': 'Piernas',
+    'espalda': 'Espalda', // Fallback
+    'dorsal': 'Espalda',
+    'espalda_alta': 'Espalda',
+    'lumbar': 'Espalda',
+    'trapecio': 'Espalda',
+    'gluteos': 'Glúteos'
+  };
+  return Array.from(muscles).map(m => map[m]).filter(Boolean);
+}
+
+function WorkoutCard({ w, onDelete }: { w: Workout, onDelete: () => void }) {
+  const doneSets = w.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0);
+  const mins = w.finishedAt && w.startedAt ? Math.round((w.finishedAt - w.startedAt) / 60000) : null;
+  const vol = Math.round(workoutVolume(w));
+  const activeRegions = getWorkoutMuscles(w);
+
+  return (
+    <div className="card" style={{ padding: '0', overflow: 'hidden', marginBottom: '20px' }}>
+      {/* Cabecera del post */}
+      <div style={{ padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h3 style={{ margin: '0 0 5px 0' }}>{w.routineName}</h3>
+          <p className="muted small-text" style={{ margin: 0 }}>
+            {w.date} {mins !== null ? `· ${mins} min` : ''}
+          </p>
+        </div>
+        <button className="btn small ghost" onClick={onDelete} aria-label="Borrar">✕</button>
+      </div>
+
+      {/* Mapa de Calor / Visual */}
+      <div style={{ background: '#000', padding: '20px 0', borderTop: '1px solid var(--surface-3)', borderBottom: '1px solid var(--surface-3)' }}>
+        <BodyMap readonly activeRegions={activeRegions} />
+      </div>
+
+      {/* Estadísticas rápidas */}
+      <div style={{ padding: '15px', display: 'flex', gap: '20px' }}>
+        <div>
+          <p className="muted small-text" style={{ margin: '0 0 4px 0' }}>Volumen Total</p>
+          <strong style={{ fontSize: '1.2em' }}>{vol.toLocaleString('es')} <small>kg</small></strong>
+        </div>
+        <div>
+          <p className="muted small-text" style={{ margin: '0 0 4px 0' }}>Series</p>
+          <strong style={{ fontSize: '1.2em' }}>{doneSets}</strong>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function History() {
   const workouts = useLiveQuery(() => db.workouts.orderBy('date').reverse().toArray(), []);
+  const [tab, setTab] = useState<'feed' | 'stats'>('feed');
+
   if (!workouts) return null;
 
   const weeks = weeklyStats(workouts);
@@ -355,59 +433,61 @@ export default function History() {
     <div className="view">
       <header className="view-head">
         <div>
-          <p className="eyebrow">Tu semana</p>
-          <h1>Progreso</h1>
+          <p className="eyebrow">Tu progreso</p>
+          <h1>Actividad</h1>
         </div>
       </header>
-      <div className="stat-row">
-        <div className="stat-tile">
-          <span className="stat-value">{thisWeek.sessions}</span>
-          <span className="stat-label">sesiones esta semana</span>
-        </div>
-        <div className="stat-tile">
-          <span className="stat-value">{thisWeek.volume.toLocaleString('es')}</span>
-          <span className="stat-label">kg esta semana</span>
-        </div>
+
+      <div className="segmented-control" style={{ marginBottom: '20px' }}>
+        <button 
+          className={`btn small ${tab === 'feed' ? 'primary' : 'ghost'}`} 
+          onClick={() => setTab('feed')}
+        >
+          Muro
+        </button>
+        <button 
+          className={`btn small ${tab === 'stats' ? 'primary' : 'ghost'}`} 
+          onClick={() => setTab('stats')}
+        >
+          Estadísticas
+        </button>
       </div>
-      <section className="card">
-        <h3>Volumen semanal (kg)</h3>
-        <VolumeChart weeks={weeks} />
-      </section>
-      <StrengthCard workouts={workouts} />
-      <BodyCard />
-      <PhotosCard />
-      <section className="card">
-        <h3>Entrenamientos</h3>
-        {workouts.length === 0 && <p className="muted">Todavía no registraste ninguno.</p>}
-        {workouts.map((w) => {
-          const doneSets = w.exercises.reduce(
-            (a, e) => a + e.sets.filter((s) => s.done).length,
-            0,
-          );
-          const mins =
-            w.finishedAt && w.startedAt
-              ? Math.round((w.finishedAt - w.startedAt) / 60000)
-              : null;
-          return (
-            <div key={w.id} className="history-row">
-              <div>
-                <strong>{w.routineName}</strong>
-                <p className="muted small-text">
-                  {w.date} · {doneSets} series · {Math.round(workoutVolume(w))} kg
-                  {mins !== null ? ` · ${mins} min` : ''}
-                </p>
-              </div>
-              <button
-                className="btn small ghost"
-                onClick={() => void db.workouts.delete(w.id!)}
-                aria-label="Borrar"
-              >
-                ✕
-              </button>
+
+      {tab === 'feed' && (
+        <div className="feed-container">
+          {workouts.length === 0 && (
+            <div className="card">
+              <p>Todavía no registraste entrenamientos.</p>
+              <p className="muted">Cuando termines tu primera rutina, aparecerá aquí.</p>
             </div>
-          );
-        })}
-      </section>
+          )}
+          {workouts.map((w) => (
+            <WorkoutCard key={w.id} w={w} onDelete={() => void db.workouts.delete(w.id!)} />
+          ))}
+        </div>
+      )}
+
+      {tab === 'stats' && (
+        <div className="stats-container">
+          <div className="stat-row">
+            <div className="stat-tile">
+              <span className="stat-value">{thisWeek.sessions}</span>
+              <span className="stat-label">sesiones esta semana</span>
+            </div>
+            <div className="stat-tile">
+              <span className="stat-value">{thisWeek.volume.toLocaleString('es')}</span>
+              <span className="stat-label">kg esta semana</span>
+            </div>
+          </div>
+          <section className="card">
+            <h3>Volumen semanal (kg)</h3>
+            <VolumeChart weeks={weeks} />
+          </section>
+          <StrengthCard workouts={workouts} />
+          <BodyCard />
+          <PhotosCard />
+        </div>
+      )}
     </div>
   );
 }
