@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { db, getSetting, setSetting, todayStr } from '../db';
 import { encryptJson, decryptJson } from '../crypto';
 import { migrateGeminiModel, DEFAULT_GEMINI_MODEL } from '../ai/coach';
+import { scheduleReminder } from '../notifications';
 import { parsePlaylists, type Playlist } from '../components/MusicBar';
 import CloudSync from '../components/CloudSync';
 
@@ -80,11 +81,13 @@ export default function Settings() {
     }
     setReminderEnabled(on);
     await setSetting('reminderEnabled', on ? '1' : '0');
+    await scheduleReminder();
   }
 
   async function saveReminderTime(t: string) {
     setReminderTime(t);
     await setSetting('reminderTime', t);
+    await scheduleReminder();
   }
 
   async function exportData() {

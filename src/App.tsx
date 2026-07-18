@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { seedIfEmpty, getSetting } from './db';
+import { seedIfEmpty } from './db';
+import { scheduleReminder } from './notifications';
 import Today from './views/Today';
 import Plan from './views/Plan';
 import History from './views/History';
@@ -38,46 +39,11 @@ export default function App() {
     void seedIfEmpty();
   }, []);
 
-  // Recordatorio diario (ahora persistente nativo con Capacitor)
+  // Recordatorio diario: se programa una vez al iniciar. Los cambios de hora o
+  // de activación lo reprograman desde Ajustes, no en cada navegación.
   useEffect(() => {
-    async function schedule() {
-      const enabled = await getSetting('reminderEnabled');
-      const time = await getSetting('reminderTime');
-
-      try {
-        // Cancelar notificaciones previas
-        await import('@capacitor/local-notifications').then(async ({ LocalNotifications }) => {
-          await LocalNotifications.cancel({ notifications: [{ id: 1 }] });
-
-          if (enabled !== '1' || !time) return;
-
-          const perm = await LocalNotifications.checkPermissions();
-          if (perm.display !== 'granted') {
-            const req = await LocalNotifications.requestPermissions();
-            if (req.display !== 'granted') return;
-          }
-
-          const [h, m] = time.split(':').map(Number);
-          await LocalNotifications.schedule({
-            notifications: [
-              {
-                title: 'Fitness Coach',
-                body: '💪 Hora de entrenar. ¡Tu rutina te espera!',
-                id: 1,
-                schedule: {
-                  on: { hour: h, minute: m },
-                  allowWhileIdle: true,
-                },
-              },
-            ],
-          });
-        });
-      } catch (e) {
-        console.warn('LocalNotifications no disponible (entorno web puro)', e);
-      }
-    }
-    void schedule();
-  }, [tab]);
+    void scheduleReminder();
+  }, []);
 
   return (
     <div className="app">

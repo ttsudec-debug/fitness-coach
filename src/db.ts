@@ -124,6 +124,39 @@ export async function setSetting(key: string, value: string): Promise<void> {
   await db.settings.put({ key, value });
 }
 
+/** Entrenamiento en curso: se guarda en cada cambio para que una sesión larga
+ * no se pierda si Android mata la app en segundo plano. Vive en `settings`
+ * (queda fuera de la sync a la nube, que solo sube una lista blanca de claves). */
+export interface ActiveWorkout {
+  routine: Routine;
+  startedAt: number;
+  phase: 'warmup' | 'lifting';
+  logs: ExerciseLog[];
+  mobilityDone: boolean[];
+  savedAt: number;
+}
+
+export const ACTIVE_WORKOUT_KEY = 'activeWorkout';
+
+export async function saveActiveWorkout(w: ActiveWorkout): Promise<void> {
+  await db.settings.put({ key: ACTIVE_WORKOUT_KEY, value: JSON.stringify(w) });
+}
+
+export async function loadActiveWorkout(): Promise<ActiveWorkout | null> {
+  const row = await db.settings.get(ACTIVE_WORKOUT_KEY);
+  if (!row?.value) return null;
+  try {
+    const w = JSON.parse(row.value) as ActiveWorkout;
+    return w && Array.isArray(w.logs) && w.routine ? w : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function clearActiveWorkout(): Promise<void> {
+  await db.settings.delete(ACTIVE_WORKOUT_KEY);
+}
+
 /** Crea una rutina de ejemplo la primera vez que se abre la app.
  * Transacción + flag: idempotente aunque StrictMode monte dos veces. */
 export async function seedIfEmpty(): Promise<void> {

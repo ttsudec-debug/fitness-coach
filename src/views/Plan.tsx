@@ -57,6 +57,15 @@ export default function Plan() {
 
   async function applyPlan() {
     if (!profile) return;
+    const existing = await db.routines.count();
+    if (
+      existing > 0 &&
+      !window.confirm(
+        `Esto reemplaza tus ${existing} rutina(s) actuales por las recomendadas. Se perderán las que hayas creado. ¿Continuar?`,
+      )
+    ) {
+      return;
+    }
     const routines = generatePlan(profile);
     await db.routines.clear();
     await db.routines.bulkAdd(routines);

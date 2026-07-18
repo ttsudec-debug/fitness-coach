@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, todayStr, DAY_NAMES, type Routine, type ExerciseLog } from '../db';
+import {
+  db,
+  todayStr,
+  DAY_NAMES,
+  saveActiveWorkout,
+  loadActiveWorkout,
+  clearActiveWorkout,
+  type Routine,
+  type ExerciseLog,
+  type ActiveWorkout,
+} from '../db';
 import RestTimer from '../components/RestTimer';
 import ExerciseSheet from '../components/ExerciseSheet';
 import ExerciseMedia from '../components/ExerciseMedia';
@@ -84,10 +94,26 @@ export default function Today() {
   const [sheet, setSheet] = useState<string | null>(null);
   const [mobility, setMobility] = useState<MobilityItem[]>([]);
   const [mobilityDone, setMobilityDone] = useState<boolean[]>([]);
+  const [resumable, setResumable] = useState<ActiveWorkout | null>(null);
 
   useEffect(() => {
     void deloadCheck().then(setDeloadMsg);
   }, [doneToday?.length]);
+
+  // Al abrir la app, si quedó un entrenamiento sin terminar (app matada en
+  // segundo plano), ofrecer retomarlo en vez de perderlo.
+  useEffect(() => {
+    void loadActiveWorkout().then((w) => {
+      if (w) setResumable(w);
+    });
+  }, []);
+
+  // Guardar el entrenamiento en curso ante cada cambio de series/fase.
+  useEffect(() => {
+    if ((phase === 'warmup' || phase === 'lifting') && active) {
+      void saveActiveWorkout({ routine: active, startedAt, phase, logs, mobilityDone, savedAt: Date.now() });
+    }
+  }, [phase, active, startedAt, logs, mobilityDone]);
 
   if (!routines) return null;
   const todays = routines.filter((r) => r.days.includes(dow));
@@ -95,6 +121,7 @@ export default function Today() {
   async function start(r: Routine) {
     const sug = await progressionSuggestions();
     setHints(sug);
+    setResumable(null);
     setActive(r);
     setStartedAt(Date.now());
     setPrs([]);
@@ -114,8 +141,35 @@ export default function Today() {
     setPhase('warmup');
   }
 
+  async function resume(w: ActiveWorkout) {
+    const sug = await progressionSuggestions();
+    setHints(sug);
+    setActive(w.routine);
+    setStartedAt(w.startedAt);
+    setLogs(w.logs);
+    setPrs([]);
+    const warm = warmupFor(w.routine.exercises);
+    setMobility(warm);
+    setMobilityDone(w.mobilityDone.length === warm.length ? w.mobilityDone : warm.map(() => false));
+    setPhase(w.phase);
+    setResumable(null);
+  }
+
+  async function discardResume() {
+    await clearActiveWorkout();
+    setResumable(null);
+  }
+
   function toggleMobility(i: number) {
     setMobilityDone((prev) => prev.map((d, x) => (x === i ? !d : d)));
+  }
+
+  function markAllSets(ei: number) {
+    setLogs((prev) => {
+      const next = prev.map((e) => ({ ...e, sets: e.sets.map((s) => ({ ...s })) }));
+      next[ei].sets.forEach((s) => (s.done = true));
+      return next;
+    });
   }
 
   function toggleSet(ei: number, si: number) {
@@ -139,6 +193,8 @@ export default function Today() {
   }
 
   function reset() {
+    void clearActiveWorkout();
+    setResumable(null);
     setPhase('home');
     setActive(null);
     setLogs([]);
@@ -148,16 +204,20 @@ export default function Today() {
 
   async function finish() {
     if (!active) return;
-    
-    // Auto-marcar como "done" las series que tengan repeticiones válidas (>0)
-    // para evitar el problema de "0 kg y 0 series" si el usuario olvidó marcarlas.
-    const finalLogs = logs.map(ex => ({
-      ...ex,
-      sets: ex.sets.map(s => ({
-        ...s,
-        done: s.done || (s.reps > 0)
-      }))
-    }));
+
+    // Una serie cuenta solo si el usuario la marcó como hecha. Descartamos los
+    // ejercicios que no tocó, para no inflar el volumen ni disparar récords falsos.
+    const finalLogs = logs
+      .map((ex) => ({ ...ex, sets: ex.sets.map((s) => ({ ...s })) }))
+      .filter((ex) => ex.sets.some((s) => s.done));
+
+    const totalDone = finalLogs.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0);
+    if (totalDone === 0) {
+      const ok = window.confirm(
+        'No marcaste ninguna serie como completada. ¿Guardar el entrenamiento igual? Contará como vacío.',
+      );
+      if (!ok) return;
+    }
 
     const records = await newPRs(finalLogs, todayStr());
     await db.workouts.add({
@@ -168,6 +228,7 @@ export default function Today() {
       startedAt,
       finishedAt: Date.now(),
     });
+    await clearActiveWorkout();
     setPrs(records);
     const stretch = stretchFor(active.exercises);
     setMobility(stretch);
@@ -325,6 +386,11 @@ export default function Today() {
                 </label>
               </div>
             ))}
+            {ex.sets.length > 0 && !ex.sets.every((s) => s.done) && (
+              <button className="btn small ghost" onClick={() => markAllSets(ei)}>
+                ✓ Marcar todas
+              </button>
+            )}
           </section>
         ))}
         {sheet && <ExerciseSheet name={sheet} onClose={() => setSheet(null)} />}
@@ -348,6 +414,22 @@ export default function Today() {
           <h1>Entrenamiento</h1>
         </div>
       </header>
+      {resumable && (
+        <div className="card warn">
+          <p className="eyebrow">Entrenamiento sin terminar</p>
+          <p className="small-text">
+            Dejaste «{resumable.routine.name}» a medias. ¿Retomás donde quedaste?
+          </p>
+          <div className="actions">
+            <button className="btn primary" onClick={() => void resume(resumable)}>
+              Retomar
+            </button>
+            <button className="btn ghost danger" onClick={() => void discardResume()}>
+              Descartar
+            </button>
+          </div>
+        </div>
+      )}
       {doneToday && doneToday.length > 0 && (
         <p className="ok">✓ Ya entrenaste hoy: {doneToday.map((w) => w.routineName).join(', ')}</p>
       )}
